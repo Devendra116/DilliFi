@@ -1,11 +1,29 @@
-export default function HomePage() {
-  return (
-    <section className="glass" style={{ padding: 24, maxWidth: 720, width: "100%" }}>
-      <h1 style={{ fontSize: 28, margin: 0, lineHeight: 1.2 }}>Welcome</h1>
-      <p className="muted" style={{ marginTop: 8 }}>
-        This is a modular Next.js + Privy starter using a glass UI. Use the top-right card to authenticate.
-      </p>
-    </section>
-  );
-}
+"use client";
 
+import { useRouter } from "next/navigation";
+import { HomePage } from "@/components/HomePage";
+
+export default function Page() {
+  const router = useRouter();
+
+  const handleViewChange = (view: string) => {
+    switch (view) {
+      case "home":
+        router.push("/");
+        break;
+      case "marketplace":
+        router.push("/marketplace");
+        break;
+      case "create":
+        router.push("/create-stragety");
+        break;
+      case "dashboard":
+        router.push("/dashboard");
+        break;
+      default:
+        router.push("/");
+    }
+  };
+
+  return <HomePage onViewChange={handleViewChange} />;
+}
