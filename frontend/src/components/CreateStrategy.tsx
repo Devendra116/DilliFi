@@ -7,7 +7,6 @@ import { Textarea } from './ui/textarea';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
 import { SelfVerification } from './SelfVerification';
-import { SelfVerification } from './SelfVerification';
 import { 
   Select,
   SelectContent,
