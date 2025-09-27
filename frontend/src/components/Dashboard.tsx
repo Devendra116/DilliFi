@@ -123,10 +123,10 @@ export function Dashboard({ user, onViewChange }: DashboardProps) {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-neutral-950 text-neutral-100 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Please sign in to view your dashboard</h1>
+            <h1 className="text-2xl font-bold text-white mb-4">Please sign in to view your dashboard</h1>
             <Button onClick={() => onViewChange('home')}>Go to Home</Button>
           </div>
         </div>
@@ -135,14 +135,14 @@ export function Dashboard({ user, onViewChange }: DashboardProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-neutral-950 text-neutral-100 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-white mb-2">
             Welcome back, {user.name || user.email}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-300">
             Manage your trading strategies and monitor performance
           </p>
         </div>
@@ -224,7 +224,7 @@ export function Dashboard({ user, onViewChange }: DashboardProps) {
                   </div>
                   <Button 
                     onClick={() => onViewChange('create')}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600"
+                    className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
                   >
                     Create New Strategy
                   </Button>
@@ -233,7 +233,7 @@ export function Dashboard({ user, onViewChange }: DashboardProps) {
               <CardContent>
                 <div className="space-y-4">
                   {activeStrategies.map((strategy) => (
-                    <div key={strategy.id} className="flex items-center justify-between p-4 border rounded-lg bg-white">
+                    <div key={strategy.id} className="flex items-center justify-between p-4 border border-neutral-800 rounded-lg bg-neutral-900">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
                           <h4 className="font-semibold">{strategy.name}</h4>
@@ -241,7 +241,7 @@ export function Dashboard({ user, onViewChange }: DashboardProps) {
                             {strategy.status}
                           </Badge>
                         </div>
-                        <div className="grid grid-cols-4 gap-4 text-sm text-gray-600">
+                        <div className="grid grid-cols-4 gap-4 text-sm text-gray-300">
                           <div>
                             <span className="font-medium text-green-600">{strategy.performance}</span>
                             <p>Performance</p>
@@ -293,7 +293,7 @@ export function Dashboard({ user, onViewChange }: DashboardProps) {
                       <p className="text-gray-500 mb-4">You haven't created any strategies yet</p>
                       <Button 
                         onClick={() => onViewChange('create')}
-                        className="bg-gradient-to-r from-blue-600 to-purple-600"
+                        className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
                       >
                         Create Your First Strategy
                       </Button>
@@ -315,16 +315,16 @@ export function Dashboard({ user, onViewChange }: DashboardProps) {
               <CardContent>
                 <div className="space-y-4">
                   {purchasedStrategies.map((strategy) => (
-                    <div key={strategy.id} className="flex items-center justify-between p-4 border rounded-lg bg-white">
+                    <div key={strategy.id} className="flex items-center justify-between p-4 border border-neutral-800 rounded-lg bg-neutral-900">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
                           <h4 className="font-semibold">{strategy.name}</h4>
-                          <span className="text-sm text-gray-600">by {strategy.creator}</span>
+                          <span className="text-sm text-gray-400">by {strategy.creator}</span>
                           <Badge className={getStatusColor(strategy.status)}>
                             {strategy.status}
                           </Badge>
                         </div>
-                        <div className="grid grid-cols-3 gap-4 text-sm text-gray-600">
+                        <div className="grid grid-cols-3 gap-4 text-sm text-gray-300">
                           <div>
                             <span className="font-medium text-green-600">{strategy.performance}</span>
                             <p>Performance</p>
@@ -374,7 +374,7 @@ export function Dashboard({ user, onViewChange }: DashboardProps) {
                   <CardDescription>Portfolio performance over time</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white">
+                  <div className="h-64 bg-gradient-to-r from-orange-500 to-amber-600 rounded-lg flex items-center justify-center text-white">
                     <div className="text-center">
                       <BarChart3 className="w-12 h-12 mx-auto mb-2" />
                       <p>Performance Chart</p>

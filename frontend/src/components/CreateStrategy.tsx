@@ -237,7 +237,7 @@ export function CreateStrategy({
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-neutral-950 text-neutral-100 py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <Alert>
             <AlertTriangle className="h-4 w-4" />
@@ -258,13 +258,13 @@ export function CreateStrategy({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-neutral-950 text-neutral-100 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-white mb-2">
             Create Trading Strategy
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-300">
             Build and deploy your own automated trading strategy
           </p>
         </div>
@@ -292,9 +292,9 @@ export function CreateStrategy({
         </div>
 
         {success && (
-          <Alert className="mb-6 border-green-200 bg-green-50">
+          <Alert className="mb-6 border-green-800 bg-green-900/30">
             <CheckCircle className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-700">
+            <AlertDescription className="text-green-400">
               Strategy created successfully! It's now available in the
               marketplace.
             </AlertDescription>
@@ -490,7 +490,7 @@ export function CreateStrategy({
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                  <div className="grid md:grid-cols-2 gap-4 p-4 bg-neutral-900 border border-neutral-800 rounded-lg">
                     <div>
                       <Label htmlFor="param-name">Parameter Name</Label>
                       <Input
@@ -572,18 +572,18 @@ export function CreateStrategy({
                       {formData.parameters.map((param, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between p-3 bg-white border rounded-lg"
+                          className="flex items-center justify-between p-3 bg-neutral-900 border border-neutral-800 rounded-lg"
                         >
                           <div>
                             <span className="font-medium">{param.name}</span>
-                            <span className="text-gray-500 ml-2">
+                            <span className="text-gray-400 ml-2">
                               ({param.type})
                             </span>
-                            <span className="text-gray-600 ml-2">
+                            <span className="text-gray-300 ml-2">
                               = {param.defaultValue}
                             </span>
                             {param.description && (
-                              <p className="text-sm text-gray-600 mt-1">
+                              <p className="text-sm text-gray-300 mt-1">
                                 {param.description}
                               </p>
                             )}
@@ -653,7 +653,7 @@ async function placeBuyOrder(amount) {
                       className="font-mono text-sm"
                       required
                     />
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-300">
                       Your strategy should export an{" "}
                       <code>executeStrategy</code> function that accepts the
                       configured parameters.
@@ -675,7 +675,7 @@ async function placeBuyOrder(amount) {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-gradient-to-r from-blue-600 to-purple-600"
+              className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
             >
               {isSubmitting ? (
                 <>
