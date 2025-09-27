@@ -41,17 +41,37 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
       if (formData.password !== formData.confirmPassword) {
         throw new Error('Passwords do not match');
       }
+
       if (formData.password.length < 6) {
         throw new Error('Password must be at least 6 characters');
       }
-      // Simulate local sign-up without Supabase
-      await new Promise((r) => setTimeout(r, 600));
+
+      const response = await fetch(`https://rvprdljvahpfqflvesmp.supabase.co/functions/v1/make-server-b4ccc00b/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2cHJkbGp2YWhwZnFmbHZlc21wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5NDU1MjUsImV4cCI6MjA3NDUyMTUyNX0.O6VTwlzXdtdQ-9PhrY4KGUd85V1XyF4xpI20BngEHKk`
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          name: formData.name
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create account');
+      }
+
       const user = {
-        id: 'user_' + Date.now(),
+        id: data.user.id,
         email: formData.email,
         name: formData.name,
-        accessToken: 'mock_access_token_' + Math.random().toString(36).slice(2),
+        accessToken: data.access_token
       };
+
       onLogin(user);
       onClose();
       setFormData({ name: '', email: '', password: '', confirmPassword: '' });
@@ -68,14 +88,31 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
     setError('');
 
     try {
-      // Simulate local sign-in without Supabase
-      await new Promise((r) => setTimeout(r, 500));
+      const response = await fetch(`https://rvprdljvahpfqflvesmp.supabase.co/functions/v1/make-server-b4ccc00b/signin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2cHJkbGp2YWhwZnFmbHZlc21wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5NDU1MjUsImV4cCI6MjA3NDUyMTUyNX0.O6VTwlzXdtdQ-9PhrY4KGUd85V1XyF4xpI20BngEHKk`
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to sign in');
+      }
+
       const user = {
-        id: 'user_' + Math.random().toString(36).slice(2),
-        email: formData.email,
-        name: formData.email,
-        accessToken: 'mock_access_token_' + Math.random().toString(36).slice(2),
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.user_metadata?.name || data.user.email,
+        accessToken: data.access_token
       };
+
       onLogin(user);
       onClose();
       setFormData({ name: '', email: '', password: '', confirmPassword: '' });
@@ -85,17 +122,10 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
       setIsLoading(false);
     }
   };
+
   const handleWalletConnect = async () => {
     setIsLoading(true);
     try {
-      // Simulate local sign-up without Supabase
-      await new Promise((r) => setTimeout(r, 600));
-      const user = {
-        id: 'user_' + Date.now(),
-        email: formData.email,
-        name: formData.name,
-        accessToken: 'mock_access_token_' + Math.random().toString(36).slice(2),
-      };
       // Simulate wallet connection
       await new Promise(resolve => setTimeout(resolve, 2000));
       
@@ -261,3 +291,59 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
                       <Input
                         id="confirm-password"
                         name="confirmPassword"
+                        type="password"
+                        placeholder="Confirm your password"
+                        className="pl-10"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating Account...
+                      </>
+                    ) : (
+                      'Create Account'
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+          </div>
+        </div>
+
+        <Button 
+          variant="outline" 
+          className="w-full"
+          onClick={handleWalletConnect}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Connecting...
+            </>
+          ) : (
+            <>
+              <Wallet className="mr-2 h-4 w-4" />
+              Connect Wallet
+            </>
+          )}
+        </Button>
+      </DialogContent>
+    </Dialog>
+  );
+}
