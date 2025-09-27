@@ -157,27 +157,25 @@ export function CreateStrategy({ user, onStrategyCreated }: CreateStrategyProps)
     setError('');
 
     try {
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (user?.accessToken) headers['Authorization'] = `Bearer ${user.accessToken}`;
-      const response = await fetch(`https://rvprdljvahpfqflvesmp.supabase.co/functions/v1/make-server-b4ccc00b/strategies`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          ...formData,
-          priceToken: formData.priceToken === 'OTHER' ? formData.priceTokenOther : formData.priceToken,
-          creator: user.name || user.email,
-          creatorId: user.id
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create strategy');
-      }
+      // Local mock: create strategy object without Supabase
+      await new Promise((r) => setTimeout(r, 500));
+      const strategyId = 'strategy_' + Date.now();
+      const strategy = {
+        id: strategyId,
+        ...formData,
+        priceToken:
+          formData.priceToken === 'OTHER' ? formData.priceTokenOther : formData.priceToken,
+        creator: user.name || user.email,
+        creatorId: user.id,
+        createdAt: new Date().toISOString(),
+        status: 'active',
+        performance: '+0.0%',
+        users: 0,
+        totalValue: '$0',
+      };
 
       setSuccess(true);
-      onStrategyCreated(data.strategy);
+      onStrategyCreated(strategy);
       
       // Reset form
       setFormData({

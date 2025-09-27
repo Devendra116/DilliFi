@@ -38,6 +38,14 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
     setError('');
 
     try {
+      // Simulate local sign-in without Supabase
+      await new Promise((r) => setTimeout(r, 500));
+      const user = {
+        id: 'user_' + Math.random().toString(36).slice(2),
+        email: formData.email,
+        name: formData.email,
+        accessToken: 'mock_access_token_' + Math.random().toString(36).slice(2),
+      };
       if (formData.password !== formData.confirmPassword) {
         throw new Error('Passwords do not match');
       }
@@ -46,31 +54,6 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
         throw new Error('Password must be at least 6 characters');
       }
 
-      const response = await fetch(`https://rvprdljvahpfqflvesmp.supabase.co/functions/v1/make-server-b4ccc00b/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2cHJkbGp2YWhwZnFmbHZlc21wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5NDU1MjUsImV4cCI6MjA3NDUyMTUyNX0.O6VTwlzXdtdQ-9PhrY4KGUd85V1XyF4xpI20BngEHKk`
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          name: formData.name
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create account');
-      }
-
-      const user = {
-        id: data.user.id,
-        email: formData.email,
-        name: formData.name,
-        accessToken: data.access_token
-      };
 
       onLogin(user);
       onClose();
@@ -88,30 +71,6 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
     setError('');
 
     try {
-      const response = await fetch(`https://rvprdljvahpfqflvesmp.supabase.co/functions/v1/make-server-b4ccc00b/signin`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2cHJkbGp2YWhwZnFmbHZlc21wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5NDU1MjUsImV4cCI6MjA3NDUyMTUyNX0.O6VTwlzXdtdQ-9PhrY4KGUd85V1XyF4xpI20BngEHKk`
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to sign in');
-      }
-
-      const user = {
-        id: data.user.id,
-        email: data.user.email,
-        name: data.user.user_metadata?.name || data.user.email,
-        accessToken: data.access_token
-      };
 
       onLogin(user);
       onClose();
@@ -126,6 +85,14 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
   const handleWalletConnect = async () => {
     setIsLoading(true);
     try {
+      // Simulate local sign-up without Supabase
+      await new Promise((r) => setTimeout(r, 600));
+      const user = {
+        id: 'user_' + Date.now(),
+        email: formData.email,
+        name: formData.name,
+        accessToken: 'mock_access_token_' + Math.random().toString(36).slice(2),
+      };
       // Simulate wallet connection
       await new Promise(resolve => setTimeout(resolve, 2000));
       
