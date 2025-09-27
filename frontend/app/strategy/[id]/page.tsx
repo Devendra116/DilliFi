@@ -15,14 +15,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  BarChart3,
-  Clock,
-  DollarSign,
-  Star,
-  TrendingUp,
-  Shield,
-} from "lucide-react";
+import { BarChart3, Clock, DollarSign, Star, TrendingUp, Shield, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { ensureSession, executePayment } from "@/lib/x402";
+import { buyStrategy, type StrategyPayload } from "@/lib/strategiesApi";
 import type { Strategy } from "@/components/Marketplace";
 
 // Fallback dataset if direct import changes later — keeps page self-contained
@@ -117,15 +113,86 @@ export default function StrategyDetailsPage() {
     [params.id]
   );
 
-  const handlePurchase = () => {
-    if (!user) {
+  const [executing, setExecuting] = useState(false);
+
+  const handlePurchase = async () => {
+    if (!user?.walletAddress || !strategy) {
       toast.error("Please sign in to purchase strategies");
       return;
     }
-    toast.loading("Processing purchase...", { id: "purchase" });
-    setTimeout(() => {
-      toast.success("Strategy purchased successfully!", { id: "purchase" });
-    }, 1200);
+    try {
+      setExecuting(true);
+      await ensureSession();
+
+      const payload: StrategyPayload = {
+        name: strategy.name,
+        desc: strategy.description,
+        creator: { chainId: "1", address: user.walletAddress },
+        triggers: [
+          {
+            type: "price",
+            condition: "above",
+            source_value: 3000,
+            target_value: 3100,
+            asset: { chainId: "1", address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" },
+            source:
+              "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd",
+          },
+        ],
+        execution_steps: [
+          {
+            integration_type: "uniswap",
+            integration_steps: [
+              {
+                step_type: "approval",
+                token: { chainId: "1", address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" },
+                amount: "1000000000000000000",
+                spender: { chainId: "1", address: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D" },
+              },
+              {
+                step_type: "swap",
+                version: "v2",
+                function_name: "swapExactETHForTokens",
+                token_in: { chainId: "1", address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" },
+                token_out: { chainId: "1", address: "0xA0b86a33E6E8c3c4e8a6C8d7f2b4A6f5B4A2cDcE" },
+                amount_in: "1000000000000000000",
+                amount_out_min: "2900000000",
+                path: [
+                  { chainId: "1", address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" },
+                  { chainId: "1", address: "0xA0b86a33E6E8c3c4e8a6C8d7f2b4A6f5B4A2cDcE" },
+                ],
+                recipient: { chainId: "1", address: user.walletAddress },
+                deadline: "1735689600",
+                extra: { slippage: "0.5", gasLimit: "200000" },
+              },
+            ],
+          },
+        ],
+        pre_conditions: [],
+        max_supply: {
+          chainId: "1",
+          address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+          amount: 100,
+        },
+        fee: {
+          chainId: "1",
+          address: "0xA0b86a33E6E8c3c4e8a6C8d7f2b4A6f5B4A2cDcE",
+          amount: 0.1,
+          recipient: user.walletAddress,
+        },
+        payment_mode: "x402",
+      };
+
+      const receipt = await executePayment({ amount: "0", currency: "ETH", description: strategy.name });
+      if (!receipt.ok) throw new Error("Payment failed");
+
+      await buyStrategy({ userAddress: user.walletAddress, strategy: payload });
+      toast.success("Strategy executed via x402 and queued for execution");
+    } catch (e: any) {
+      toast.error(e?.message || "Execution failed");
+    } finally {
+      setExecuting(false);
+    }
   };
 
   if (!strategy) {
@@ -259,9 +326,17 @@ export default function StrategyDetailsPage() {
                   style={{ background: "rgb(255, 122, 0)" }}
                   className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white"
                   onClick={handlePurchase}
+                  disabled={executing}
                 >
-                  <DollarSign className="w-4 h-4 mr-2" />
-                  Purchase Strategy
+                  {executing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Executing…
+                    </>
+                  ) : (
+                    <>
+                      <DollarSign className="w-4 h-4 mr-2" /> Execute via x402
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
