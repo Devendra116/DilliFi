@@ -12,11 +12,20 @@
     "verify": "hardhat verify",
     "clean": "hardhat clean"
   },
-  "keywords": ["hardhat", "solidity", "blockchain", "self-protocol", "proof-of-humanity", "celo", "celo-sepolia"],
+  "keywords": [
+    "hardhat",
+    "solidity",
+    "blockchain",
+    "self-protocol",
+    "proof-of-humanity",
+    "celo",
+    "celo-sepolia"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "dotenv": "^17.2.2",
     "hardhat": "^2.0.0"
   },
   "dependencies": {
