@@ -29,15 +29,36 @@ import {
   Clock,
 } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
+import Link from "next/link";
 
 interface MarketplaceProps {
   user: any;
   onPurchase: (strategyId: string) => void;
 }
 
+export type Strategy = {
+  id: string;
+  name: string;
+  description: string;
+  creator: string;
+  creatorAvatar: string;
+  category: string;
+  performance: string;
+  performanceValue: number;
+  risk: "Low" | "Medium" | "High";
+  price: string;
+  priceUSD: string;
+  rating: number;
+  users: number;
+  totalValue: string;
+  createdAt: string;
+  tags: string[];
+  verified: boolean;
+};
+
 export function Marketplace({ user, onPurchase }: MarketplaceProps) {
-  const [strategies, setStrategies] = useState<any[]>([]);
-  const [filteredStrategies, setFilteredStrategies] = useState<any[]>([]);
+  const [strategies, setStrategies] = useState<Strategy[]>([]);
+  const [filteredStrategies, setFilteredStrategies] = useState<Strategy[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedRisk, setSelectedRisk] = useState("all");
@@ -45,7 +66,7 @@ export function Marketplace({ user, onPurchase }: MarketplaceProps) {
   const [loading, setLoading] = useState(true);
 
   // Mock data - in a real app, this would come from your backend
-  const mockStrategies = [
+  const mockStrategies: Strategy[] = [
     {
       id: "1",
       name: "DeFi Yield Maximizer",
@@ -448,14 +469,24 @@ export function Marketplace({ user, onPurchase }: MarketplaceProps) {
                       {strategy.category}
                     </Badge>
                   </div>
-                  <Button
-                    style={{ background: "rgb(255, 122, 0)" }}
-                    className="w-full bg-orange-500 to-amber-600 text-white"
-                    onClick={() => handlePurchase(strategy.id)}
-                  >
-                    <DollarSign className="w-4 h-4 mr-2" />
-                    Purchase Strategy
-                  </Button>
+                  <div className="flex gap-2">
+                    <Link
+                      className="flex-1"
+                      href={`/strategy/${encodeURIComponent(strategy.id)}`}
+                    >
+                      <Button variant="secondary" className="w-full">
+                        View Details
+                      </Button>
+                    </Link>
+                    <Button
+                      style={{ background: "rgb(255, 122, 0)" }}
+                      className="w-full bg-orange-500 to-amber-600 text-white flex-1"
+                      onClick={() => handlePurchase(strategy.id)}
+                    >
+                      <DollarSign className="w-4 h-4 mr-2" />
+                      Purchase
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
