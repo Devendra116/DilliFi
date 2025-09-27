@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { Marketplace } from "@/components/Marketplace";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 
 export default function MarketplacePage() {
   const { ready, authenticated, user: privyUser, getAccessToken } = (usePrivy() as any);
