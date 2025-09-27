@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -13,6 +13,7 @@ import { Textarea } from "./ui/textarea";
 import { Badge } from "./ui/badge";
 import { Alert, AlertDescription } from "./ui/alert";
 import { SelfVerification } from "./SelfVerification";
+import { isHumanOnChain } from "@/lib/selfContract";
 import {
   Select,
   SelectContent,
@@ -73,6 +74,7 @@ export function CreateStrategy({
 
   const [isVerified, setIsVerified] = useState(false);
   const [verifiedAddress, setVerifiedAddress] = useState<string | null>(null);
+  const [checkingOnChain, setCheckingOnChain] = useState(false);
 
   const categories = [
     "Yield Farming",
@@ -89,6 +91,28 @@ export function CreateStrategy({
 
   const riskLevels = ["Low", "Medium", "High"];
   const paramTypes = ["number", "string", "boolean", "percentage"];
+
+  // Check on-chain verification status (Self verifier contract)
+  useEffect(() => {
+    let mounted = true;
+    const run = async () => {
+      if (!user?.walletAddress) return;
+      setCheckingOnChain(true);
+      try {
+        const ok = await isHumanOnChain(user.walletAddress);
+        if (mounted) {
+          setIsVerified(prev => prev || ok);
+          if (ok) setVerifiedAddress(user.walletAddress);
+        }
+      } finally {
+        if (mounted) setCheckingOnChain(false);
+      }
+    };
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, [user?.walletAddress]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -282,7 +306,9 @@ export function CreateStrategy({
                   : ""}
               </span>
             ) : (
-              <span className="text-red-600">Not verified</span>
+              <span className="text-red-600">
+                {checkingOnChain ? "Checking…" : "Not verified"}
+              </span>
             )}
           </div>
           <SelfVerification
