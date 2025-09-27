@@ -2,43 +2,46 @@
 
 :root {
   --font-size: 16px;
-  --background: #ffffff;
-  --foreground: oklch(0.145 0 0);
-  --card: #ffffff;
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #030213;
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.95 0.0058 264.53);
-  --secondary-foreground: #030213;
-  --muted: #ececf0;
-  --muted-foreground: #717182;
-  --accent: #e9ebef;
-  --accent-foreground: #030213;
-  --destructive: #d4183d;
-  --destructive-foreground: #ffffff;
-  --border: rgba(0, 0, 0, 0.1);
-  --input: transparent;
-  --input-background: #f3f3f5;
-  --switch-background: #cbced4;
+  /* Default to dark theme tokens to avoid FOUC */
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  /* Brand: iPhone 17 Pro–style orange */
+  --primary: #ff7a00;
+  --primary-foreground: #0b0b0b;
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --input-background: transparent;
+  --switch-background: #3a3a3a;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --ring: #ff7a00;
+  /* Chart palette skewed to orange/amber */
+  --chart-1: #ffb84d;
+  --chart-2: #ff7a00;
+  --chart-3: #ff3d00;
+  --chart-4: #ff9500;
+  --chart-5: #ffc300;
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: #030213;
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: #ff7a00;
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);  
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: #ff7a00;
 }
 
 .dark {
@@ -48,8 +51,8 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.145 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  --primary: #ff7a00;
+  --primary-foreground: #0b0b0b;
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -57,25 +60,25 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.269 0 0);
   --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
+  --ring: #ff7a00;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  --chart-1: #ffb84d;
+  --chart-2: #ff7a00;
+  --chart-3: #ff3d00;
+  --chart-4: #ff9500;
+  --chart-5: #ffc300;
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary: #ff7a00;
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --sidebar-ring: #ff7a00;
 }
 
 @theme inline {
@@ -186,4 +189,148 @@
 
 html {
   font-size: var(--font-size);
+}
+
+/* Local light theme scope for components that should render in light mode. */
+.theme-light {
+  --background: #ffffff;
+  --foreground: oklch(0.145 0 0);
+  --card: #ffffff;
+  --card-foreground: oklch(0.145 0 0);
+  --popover: #ffffff;
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: #ff7a00;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f3f5;
+  --secondary-foreground: #030213;
+  --muted: #ececf0;
+  --muted-foreground: #717182;
+  --accent: #e9ebef;
+  --accent-foreground: #030213;
+  --destructive: #d4183d;
+  --destructive-foreground: #ffffff;
+  --border: rgba(0, 0, 0, 0.1);
+  --input: #e5e7eb;
+  --input-background: #f3f3f5;
+  --switch-background: #cbced4;
+  --ring: #ff7a00;
+  --chart-1: #ff7a00;
+  --chart-2: #ff9500;
+  --chart-3: #ffc300;
+  --chart-4: #ffb84d;
+  --chart-5: #ff3d00;
+  --sidebar: #ffffff;
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: #ff7a00;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f5f5f5;
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #ff7a00;
+}
+
+/* Global Lucide icon background styling */
+.lucide {
+  display: inline-block;
+  background-image: linear-gradient(135deg, #ff7a00, #ff9500);
+  color: #ffffff;
+  border-radius: 0.375rem; /* rounded-md */
+  padding: 2px; /* subtle chip */
+}
+
+/* Disable icon background when inside button or explicit containers */
+[data-slot="button"] .lucide,
+.icon-no-bg,
+.icon-tile .lucide {
+  background: none !important;
+  padding: 0 !important;
+  color: inherit;
+}
+
+/* Hero background and panel to match design */
+.hero-bg {
+  background:
+    radial-gradient(1200px 600px at -10% 30%, rgba(255, 122, 0, 0.18), transparent),
+    radial-gradient(800px 400px at 110% 20%, rgba(255, 149, 0, 0.12), transparent),
+    linear-gradient(180deg, #0b0b0b 0%, #0a0a0a 100%);
+}
+
+.hero-panel {
+  position: relative;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #1a120a 0%, #0f0d0b 100%);
+}
+
+.hero-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px; /* border thickness */
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 122, 0, 0.5), rgba(255, 149, 0, 0.2));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
+.hero-panel::after {
+  content: "";
+  position: absolute;
+  inset: -24px;
+  border-radius: inherit;
+  background:
+    radial-gradient(60% 60% at 10% 10%, rgba(255, 122, 0, 0.15), transparent),
+    radial-gradient(50% 50% at 90% 20%, rgba(255, 149, 0, 0.12), transparent);
+  z-index: -1;
+  filter: blur(18px);
+}
+
+/* Reusable subtle orange hover-glow for all cards */
+.card-hover {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  transition: box-shadow 200ms ease, transform 200ms ease, border-color 200ms ease;
+}
+
+.card-hover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px; /* gradient border thickness */
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 122, 0, 0.55), rgba(255, 149, 0, 0.2));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0; /* only show on hover */
+  transition: opacity 200ms ease;
+}
+
+.card-hover::after {
+  content: "";
+  position: absolute;
+  inset: -24px;
+  border-radius: inherit;
+  background:
+    radial-gradient(60% 60% at 10% 10%, rgba(255, 122, 0, 0.12), transparent),
+    radial-gradient(50% 50% at 90% 20%, rgba(255, 149, 0, 0.08), transparent);
+  filter: blur(18px);
+  z-index: -1;
+  opacity: 0; /* only show on hover */
+  transition: opacity 250ms ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), 0 0 0 0 rgba(255, 122, 0, 0.08);
+}
+
+.card-hover:hover::before,
+.card-hover:hover::after {
+  opacity: 1;
 }
