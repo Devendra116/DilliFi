@@ -23,11 +23,17 @@ export const SELF_VERIFIER_ABI = [
   },
 ] as const;
 
-const CONTRACT_ADDRESS = (process.env.NEXT_PUBLIC_SELF_CONTRACT_ADDRESS || "").trim() as Address;
+const CONTRACT_ADDRESS = (
+  process.env.NEXT_PUBLIC_SELF_CONTRACT_ADDRESS || ""
+).trim() as Address;
 
 function getRpcAndChain() {
   const net = (process.env.NEXT_PUBLIC_SELF_NETWORK || "celo").toLowerCase();
-  if (net === "staging_celo" || net === "alfajores" || net === "celo-alfajores") {
+  if (
+    net === "staging_celo" ||
+    net === "alfajores" ||
+    net === "celo-alfajores"
+  ) {
     return {
       chain: celoAlfajores,
       rpcUrl: "https://alfajores-forno.celo-testnet.org",
@@ -44,7 +50,9 @@ const { chain, rpcUrl } = getRpcAndChain();
 
 const client = createPublicClient({ chain, transport: http(rpcUrl) });
 
-export async function isHumanOnChain(address?: string | null): Promise<boolean> {
+export async function isHumanOnChain(
+  address?: string | null
+): Promise<boolean> {
   try {
     if (!CONTRACT_ADDRESS || !address) return false;
     const result = await client.readContract({
@@ -53,6 +61,7 @@ export async function isHumanOnChain(address?: string | null): Promise<boolean> 
       functionName: "isHuman",
       args: [address as Address],
     });
+    console.log("isHumanOnChain result:", result);
     return Boolean(result);
   } catch {
     return false;
@@ -73,4 +82,3 @@ export async function getVerificationDetails(address?: string | null) {
     return null;
   }
 }
-

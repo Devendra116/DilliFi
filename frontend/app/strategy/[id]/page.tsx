@@ -5,18 +5,88 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { usePrivy } from "@privy-io/react-auth";
 import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BarChart3, Clock, DollarSign, Star, TrendingUp, Shield } from "lucide-react";
+import {
+  BarChart3,
+  Clock,
+  DollarSign,
+  Star,
+  TrendingUp,
+  Shield,
+} from "lucide-react";
 import type { Strategy } from "@/components/Marketplace";
 
 // Fallback dataset if direct import changes later — keeps page self-contained
 const FALLBACK: Strategy[] = [
-  { id: "1", name: "DeFi Yield Maximizer", description: "Automatically compounds yields across multiple DeFi protocols for maximum returns.", creator: "CryptoAlpha", creatorAvatar: "/api/placeholder/40/40", category: "Yield Farming", performance: "+127.3%", performanceValue: 127.3, risk: "Medium", price: "0.5 ETH", priceUSD: "$1,250", rating: 4.8, users: 1240, totalValue: "$2.4M", createdAt: "2024-01-15", tags: ["DeFi","Yield","Auto-compound"], verified: true },
-  { id: "2", name: "Arbitrage Hunter", description: "Exploits price differences across exchanges for consistent, low-risk profits.", creator: "QuantTrader", creatorAvatar: "/api/placeholder/40/40", category: "Arbitrage", performance: "+89.1%", performanceValue: 89.1, risk: "Low", price: "0.3 ETH", priceUSD: "$750", rating: 4.9, users: 856, totalValue: "$1.8M", createdAt: "2024-02-01", tags: ["Arbitrage","Low-risk","CEX-DEX"], verified: true },
-  { id: "3", name: "Momentum Scalper", description: "High-frequency trading strategy that captures small price movements.", creator: "TechAnalyst", creatorAvatar: "/api/placeholder/40/40", category: "Scalping", performance: "+156.7%", performanceValue: 156.7, risk: "High", price: "0.8 ETH", priceUSD: "$2,000", rating: 4.6, users: 634, totalValue: "$3.1M", createdAt: "2024-01-10", tags: ["Scalping","High-frequency","Technical"], verified: false },
+  {
+    id: "1",
+    name: "DeFi Yield Maximizer",
+    description:
+      "Automatically compounds yields across multiple DeFi protocols for maximum returns.",
+    creator: "CryptoAlpha",
+    creatorAvatar: "/api/placeholder/40/40",
+    category: "Yield Farming",
+    performance: "+127.3%",
+    performanceValue: 127.3,
+    risk: "Medium",
+    price: "0.5 ETH",
+    priceUSD: "$1,250",
+    rating: 4.8,
+    users: 1240,
+    totalValue: "$2.4M",
+    createdAt: "2024-01-15",
+    tags: ["DeFi", "Yield", "Auto-compound"],
+    verified: true,
+  },
+  {
+    id: "2",
+    name: "Arbitrage Hunter",
+    description:
+      "Exploits price differences across exchanges for consistent, low-risk profits.",
+    creator: "QuantTrader",
+    creatorAvatar: "/api/placeholder/40/40",
+    category: "Arbitrage",
+    performance: "+89.1%",
+    performanceValue: 89.1,
+    risk: "Low",
+    price: "0.3 ETH",
+    priceUSD: "$750",
+    rating: 4.9,
+    users: 856,
+    totalValue: "$1.8M",
+    createdAt: "2024-02-01",
+    tags: ["Arbitrage", "Low-risk", "CEX-DEX"],
+    verified: true,
+  },
+  {
+    id: "3",
+    name: "Momentum Scalper",
+    description:
+      "High-frequency trading strategy that captures small price movements.",
+    creator: "TechAnalyst",
+    creatorAvatar: "/api/placeholder/40/40",
+    category: "Scalping",
+    performance: "+156.7%",
+    performanceValue: 156.7,
+    risk: "High",
+    price: "0.8 ETH",
+    priceUSD: "$2,000",
+    rating: 4.6,
+    users: 634,
+    totalValue: "$3.1M",
+    createdAt: "2024-01-10",
+    tags: ["Scalping", "High-frequency", "Technical"],
+    verified: false,
+  },
 ];
 
 export default function StrategyDetailsPage() {
@@ -37,7 +107,8 @@ export default function StrategyDetailsPage() {
         privyUser?.google?.pictureUrl ||
         privyUser?.twitter?.profilePictureUrl ||
         undefined,
-      walletAddress: privyUser?.wallet?.address || privyUser?.wallets?.[0]?.address,
+      walletAddress:
+        privyUser?.wallet?.address || privyUser?.wallets?.[0]?.address,
     };
   }, [ready, authenticated, privyUser]);
 
@@ -64,7 +135,9 @@ export default function StrategyDetailsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Strategy not found</CardTitle>
-              <CardDescription>The strategy you’re looking for does not exist.</CardDescription>
+              <CardDescription>
+                The strategy you’re looking for does not exist.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Link href="/marketplace">
@@ -78,21 +151,29 @@ export default function StrategyDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 py-8">
+    <div className="hero-bg min-h-screen bg-neutral-950 text-neutral-100 py-8">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <Avatar className="h-12 w-12">
-              <AvatarImage src={strategy.creatorAvatar} alt={strategy.creator} />
-              <AvatarFallback>{strategy.creator.charAt(0)}</AvatarFallback>
+            <Avatar className="h-12 w-12 gap-3">
+              <AvatarImage
+                src={strategy.creatorAvatar}
+                alt={strategy.creator}
+              />
+              <AvatarFallback className="mr-3">
+                {strategy.creator.charAt(0)}
+              </AvatarFallback>
             </Avatar>
             <div>
               <h1 className="text-3xl font-bold text-white flex items-center gap-2">
                 {strategy.name}
-                {strategy.verified && <Shield className="w-5 h-5 text-orange-500" />}
+                {strategy.verified && (
+                  <Shield className="w-5 h-5 text-orange-500" />
+                )}
               </h1>
               <p className="text-sm text-gray-400">
-                by {strategy.creator} • {new Date(strategy.createdAt).toLocaleDateString()}
+                by {strategy.creator} •{" "}
+                {new Date(strategy.createdAt).toLocaleDateString()}
               </p>
             </div>
           </div>
@@ -109,7 +190,9 @@ export default function StrategyDetailsPage() {
                 <CardDescription>{strategy.category}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="leading-relaxed text-gray-200">{strategy.description}</p>
+                <p className="leading-relaxed text-gray-200">
+                  {strategy.description}
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {strategy.tags.map((t) => (
                     <Badge key={t} variant="secondary">
@@ -131,7 +214,9 @@ export default function StrategyDetailsPage() {
                     <TrendingUp className="w-4 h-4" />
                     <span>Performance</span>
                   </div>
-                  <p className="font-semibold text-green-500">{strategy.performance}</p>
+                  <p className="font-semibold text-green-500">
+                    {strategy.performance}
+                  </p>
                 </div>
                 <div>
                   <div className="flex items-center gap-1 text-gray-400">
@@ -143,11 +228,15 @@ export default function StrategyDetailsPage() {
                 <div className="flex items-center gap-1">
                   <Star className="w-4 h-4 text-yellow-400 fill-current" />
                   <span className="font-medium">{strategy.rating}</span>
-                  <span className="text-gray-400">({strategy.users} users)</span>
+                  <span className="text-gray-400">
+                    ({strategy.users} users)
+                  </span>
                 </div>
                 <div className="flex items-center gap-1 text-gray-400">
                   <Clock className="w-4 h-4" />
-                  <span>{new Date(strategy.createdAt).toLocaleDateString()}</span>
+                  <span>
+                    {new Date(strategy.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -167,6 +256,7 @@ export default function StrategyDetailsPage() {
                   <Badge variant="outline">{strategy.category}</Badge>
                 </div>
                 <Button
+                  style={{ background: "rgb(255, 122, 0)" }}
                   className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white"
                   onClick={handlePurchase}
                 >
@@ -194,4 +284,3 @@ export default function StrategyDetailsPage() {
     </div>
   );
 }
-

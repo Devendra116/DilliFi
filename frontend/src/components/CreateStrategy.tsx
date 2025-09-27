@@ -101,7 +101,7 @@ export function CreateStrategy({
       try {
         const ok = await isHumanOnChain(user.walletAddress);
         if (mounted) {
-          setIsVerified(prev => prev || ok);
+          setIsVerified((prev) => prev || ok);
           if (ok) setVerifiedAddress(user.walletAddress);
         }
       } finally {
