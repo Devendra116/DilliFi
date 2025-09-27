@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
-import { SelfVerificationRoot } from "@selfxyz/contracts/contracts/abstract/SelfVerificationRoot.sol";
-import { ISelfVerificationRoot } from "@selfxyz/contracts/contracts/interfaces/ISelfVerificationRoot.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import {SelfVerificationRoot} from "@selfxyz/contracts/contracts/abstract/SelfVerificationRoot.sol";
+import {ISelfVerificationRoot} from "@selfxyz/contracts/contracts/interfaces/ISelfVerificationRoot.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {SelfStructs} from "@selfxyz/contracts/contracts/libraries/SelfStructs.sol";
+import {SelfUtils} from "@selfxyz/contracts/contracts/libraries/SelfUtils.sol";
+import {IIdentityVerificationHubV2} from "@selfxyz/contracts/contracts/interfaces/IIdentityVerificationHubV2.sol";
 
 /**
  * @title HumanVerificationRegistry
@@ -15,34 +18,44 @@ contract HumanVerificationRegistry is SelfVerificationRoot, Ownable {
     mapping(address => bool) public isVerifiedHuman;
     mapping(address => uint256) public verificationTime;
     mapping(address => bytes32) public verificationId;
-    
+
+    SelfStructs.VerificationConfigV2 public verificationConfig;
     // Track statistics
     uint256 public totalVerifiedHumans;
     address[] public verifiedAddresses;
-    
+
     // Storage for verification config ID
     bytes32 public verificationConfigId;
-    
+
     // Events
-    event HumanVerified(address indexed human, uint256 timestamp, bytes32 verificationId);
+    event HumanVerified(
+        address indexed human,
+        uint256 timestamp,
+        bytes32 verificationId
+    );
 
     /**
      * @notice Constructor for the HumanVerificationRegistry contract
      * @param identityVerificationHubV2Address The address of the Identity Verification Hub V2
      * @param scope The scope for verification
-     * @param _verificationConfigId The verification configuration ID
+     * @param _verificationConfig The verification configuration
      * @param _admin The admin/owner of the contract
      */
     constructor(
         address identityVerificationHubV2Address,
-        uint256 scope,
-        bytes32 _verificationConfigId,
+        string memory scope,
+        SelfUtils.UnformattedVerificationConfigV2 memory _verificationConfig,
         address _admin
     )
         SelfVerificationRoot(identityVerificationHubV2Address, scope)
         Ownable(_admin)
     {
-        verificationConfigId = _verificationConfigId;
+        verificationConfig = SelfUtils.formatVerificationConfigV2(
+            _verificationConfig
+        );
+        verificationConfigId = IIdentityVerificationHubV2(
+            identityVerificationHubV2Address
+        ).setVerificationConfigV2(verificationConfig);
     }
 
     /**
@@ -54,21 +67,28 @@ contract HumanVerificationRegistry is SelfVerificationRoot, Ownable {
     function customVerificationHook(
         ISelfVerificationRoot.GenericDiscloseOutputV2 memory output,
         bytes memory userData
-    )
-        internal
-        override
-    {
+    ) internal override {
         address humanAddress = address(uint160(output.userIdentifier));
-        
+
         // Only register if not already verified
         if (!isVerifiedHuman[humanAddress]) {
             isVerifiedHuman[humanAddress] = true;
             verificationTime[humanAddress] = block.timestamp;
-            verificationId[humanAddress] = keccak256(abi.encodePacked(output.nullifier, block.timestamp, humanAddress));
+            verificationId[humanAddress] = keccak256(
+                abi.encodePacked(
+                    output.nullifier,
+                    block.timestamp,
+                    humanAddress
+                )
+            );
             verifiedAddresses.push(humanAddress);
             totalVerifiedHumans++;
-            
-            emit HumanVerified(humanAddress, block.timestamp, verificationId[humanAddress]);
+
+            emit HumanVerified(
+                humanAddress,
+                block.timestamp,
+                verificationId[humanAddress]
+            );
         }
     }
 
@@ -88,15 +108,25 @@ contract HumanVerificationRegistry is SelfVerificationRoot, Ownable {
      * @return timestamp When the address was verified
      * @return id The verification ID
      */
-    function getVerificationDetails(address human) external view returns (bool verified, uint256 timestamp, bytes32 id) {
-        return (isVerifiedHuman[human], verificationTime[human], verificationId[human]);
+    function getVerificationDetails(
+        address human
+    ) external view returns (bool verified, uint256 timestamp, bytes32 id) {
+        return (
+            isVerifiedHuman[human],
+            verificationTime[human],
+            verificationId[human]
+        );
     }
 
     /**
      * @notice Get all verified addresses (use with caution for large datasets)
      * @return Array of all verified human addresses
      */
-    function getAllVerifiedAddresses() external view returns (address[] memory) {
+    function getAllVerifiedAddresses()
+        external
+        view
+        returns (address[] memory)
+    {
         return verifiedAddresses;
     }
 
@@ -114,7 +144,10 @@ contract HumanVerificationRegistry is SelfVerificationRoot, Ownable {
      * @param endTime End timestamp
      * @return count Number of verifications in the time range
      */
-    function getVerificationsInRange(uint256 startTime, uint256 endTime) external view returns (uint256 count) {
+    function getVerificationsInRange(
+        uint256 startTime,
+        uint256 endTime
+    ) external view returns (uint256 count) {
         count = 0;
         for (uint256 i = 0; i < verifiedAddresses.length; i++) {
             uint256 verifyTime = verificationTime[verifiedAddresses[i]];
@@ -122,14 +155,6 @@ contract HumanVerificationRegistry is SelfVerificationRoot, Ownable {
                 count++;
             }
         }
-    }
-
-    /**
-     * @notice Expose the internal _setScope function for configuration (owner only)
-     * @param newScope The new scope value to set
-     */
-    function setScope(uint256 newScope) external onlyOwner {
-        _setScope(newScope);
     }
 
     /**
@@ -148,15 +173,10 @@ contract HumanVerificationRegistry is SelfVerificationRoot, Ownable {
      * @return The verification configuration ID
      */
     function getConfigId(
-        bytes32 _destinationChainId,  
-        bytes32 _userIdentifier,  
-        bytes memory _userDefinedData  
-    )
-        public
-        view
-        override
-        returns (bytes32)
-    {
+        bytes32 _destinationChainId,
+        bytes32 _userIdentifier,
+        bytes memory _userDefinedData
+    ) public view override returns (bytes32) {
         return verificationConfigId;
     }
 }
