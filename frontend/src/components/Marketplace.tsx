@@ -29,7 +29,7 @@ import {
   Clock,
 } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface MarketplaceProps {
   user: any;
@@ -57,6 +57,7 @@ export type Strategy = {
 };
 
 export function Marketplace({ user, onPurchase }: MarketplaceProps) {
+  const router = useRouter();
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [filteredStrategies, setFilteredStrategies] = useState<Strategy[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -372,7 +373,18 @@ export function Marketplace({ user, onPurchase }: MarketplaceProps) {
           {filteredStrategies.map((strategy) => (
             <Card
               key={strategy.id}
-              className="hover:shadow-lg transition-shadow"
+              className="hover:shadow-lg transition-shadow cursor-pointer"
+              role="button"
+              tabIndex={0}
+              onClick={() =>
+                router.push(`/strategy/${encodeURIComponent(strategy.id)}`)
+              }
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  router.push(`/strategy/${encodeURIComponent(strategy.id)}`);
+                }
+              }}
             >
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -469,24 +481,18 @@ export function Marketplace({ user, onPurchase }: MarketplaceProps) {
                       {strategy.category}
                     </Badge>
                   </div>
-                  <div className="flex gap-2">
-                    <Link
-                      className="flex-1"
-                      href={`/strategy/${encodeURIComponent(strategy.id)}`}
-                    >
-                      <Button variant="secondary" className="w-full">
-                        View Details
-                      </Button>
-                    </Link>
-                    <Button
-                      style={{ background: "rgb(255, 122, 0)" }}
-                      className="w-full bg-orange-500 to-amber-600 text-white flex-1"
-                      onClick={() => handlePurchase(strategy.id)}
-                    >
-                      <DollarSign className="w-4 h-4 mr-2" />
-                      Purchase
-                    </Button>
-                  </div>
+                  <Button
+                    style={{ background: "rgb(255, 122, 0)" }}
+                    className="w-full bg-orange-500 to-amber-600 text-white"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handlePurchase(strategy.id);
+                    }}
+                  >
+                    <DollarSign className="w-4 h-4 mr-2" />
+                    Purchase
+                  </Button>
                 </div>
               </CardContent>
             </Card>
