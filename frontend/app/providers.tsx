@@ -9,13 +9,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
       appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ""}
       config={{
         loginMethods: ["wallet"],
-        appearance: { theme: "light" },
+        appearance: { theme: "dark" },
         embeddedWallets: { createOnLogin: "users-without-wallets" },
       }}
     >
       <ThemeProvider
         attribute="class"
-        defaultTheme="light"
+        defaultTheme="dark"
+        forcedTheme="dark"
         enableSystem={false}
       >
         {children}

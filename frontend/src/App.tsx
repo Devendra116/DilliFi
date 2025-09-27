@@ -131,7 +131,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-neutral-950 text-neutral-100">
       <Header
         currentView={currentView}
         onViewChange={handleViewChange}

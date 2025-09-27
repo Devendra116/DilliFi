@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Providers } from './providers'
 import '../src/index.css'
+import '../src/styles/globals.css'
 import HeaderClient from './HeaderClient'
 import { Toaster } from '@/components/ui/sonner'
 
@@ -14,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning className="dark">
       <body>
         <Providers>
           <HeaderClient />
