@@ -38,23 +38,20 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
     setError('');
 
     try {
-      // Simulate local sign-in without Supabase
-      await new Promise((r) => setTimeout(r, 500));
-      const user = {
-        id: 'user_' + Math.random().toString(36).slice(2),
-        email: formData.email,
-        name: formData.email,
-        accessToken: 'mock_access_token_' + Math.random().toString(36).slice(2),
-      };
       if (formData.password !== formData.confirmPassword) {
         throw new Error('Passwords do not match');
       }
-
       if (formData.password.length < 6) {
         throw new Error('Password must be at least 6 characters');
       }
-
-
+      // Simulate local sign-up without Supabase
+      await new Promise((r) => setTimeout(r, 600));
+      const user = {
+        id: 'user_' + Date.now(),
+        email: formData.email,
+        name: formData.name,
+        accessToken: 'mock_access_token_' + Math.random().toString(36).slice(2),
+      };
       onLogin(user);
       onClose();
       setFormData({ name: '', email: '', password: '', confirmPassword: '' });
@@ -71,7 +68,14 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
     setError('');
 
     try {
-
+      // Simulate local sign-in without Supabase
+      await new Promise((r) => setTimeout(r, 500));
+      const user = {
+        id: 'user_' + Math.random().toString(36).slice(2),
+        email: formData.email,
+        name: formData.email,
+        accessToken: 'mock_access_token_' + Math.random().toString(36).slice(2),
+      };
       onLogin(user);
       onClose();
       setFormData({ name: '', email: '', password: '', confirmPassword: '' });
@@ -81,9 +85,13 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
       setIsLoading(false);
     }
   };
-
-  const handleWalletConnect = async () => {
-    setIsLoading(true);
+      setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
     try {
       // Simulate local sign-up without Supabase
       await new Promise((r) => setTimeout(r, 600));
