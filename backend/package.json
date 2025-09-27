@@ -1,0 +1,32 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "TypeScript Express Backend",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "nodemon --exec ts-node src/main.ts",
+    "build": "tsc",
+    "start": "tsx src/main.ts",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.5.2",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@mysten/sui": "^1.38.0",
+    "@mysten/walrus": "^0.7.0",
+    "@types/mongoose": "^5.11.97",
+    "express": "^5.1.0",
+    "mongoose": "^8.18.2",
+    "tsx": "^4.20.6",
+    "x402": "^0.6.5",
+    "x402-express": "^0.6.5",
+    "zod": "^3.22.4"
+  }
+}

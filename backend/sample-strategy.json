@@ -1,0 +1,90 @@
+{
+  "userAddress": "0x742d35Cc6634C0532925a3b8D321a432E7Cc8b51",
+  "strategy": {
+    "name": "ETH-USDC Swap Strategy",
+    "desc": "Automated ETH to USDC swap when ETH price goes above $3000",
+    "creator": {
+      "chainId": "1",
+      "address": "0x742d35Cc6634C0532925a3b8D321a432E7Cc8b51"
+    },
+    "triggers": [
+      {
+        "type": "price",
+        "condition": "above",
+        "source_value": 3000,
+        "target_value": 3100,
+        "asset": {
+          "chainId": "1",
+          "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+        },
+        "source": "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+      }
+    ],
+    "execution_steps": [
+      {
+        "integration_type": "uniswap",
+        "integration_steps": [
+          {
+            "step_type": "approval",
+            "token": {
+              "chainId": "1",
+              "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+            },
+            "amount": "1000000000000000000",
+            "spender": {
+              "chainId": "1",
+              "address": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"
+            }
+          },
+          {
+            "step_type": "swap",
+            "version": "v2",
+            "function_name": "swapExactETHForTokens",
+            "token_in": {
+              "chainId": "1",
+              "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+            },
+            "token_out": {
+              "chainId": "1",
+              "address": "0xA0b86a33E6E8c3c4e8a6C8d7f2b4A6f5B4A2cDcE"
+            },
+            "amount_in": "1000000000000000000",
+            "amount_out_min": "2900000000",
+            "path": [
+              {
+                "chainId": "1",
+                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+              },
+              {
+                "chainId": "1",
+                "address": "0xA0b86a33E6E8c3c4e8a6C8d7f2b4A6f5B4A2cDcE"
+              }
+            ],
+            "recipient": {
+              "chainId": "1",
+              "address": "0x742d35Cc6634C0532925a3b8D321a432E7Cc8b51"
+            },
+            "deadline": "1735689600",
+            "extra": {
+              "slippage": "0.5",
+              "gasLimit": "200000"
+            }
+          }
+        ]
+      }
+    ],
+    "pre_conditions": [],
+    "max_supply": {
+      "chainId": "1",
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "amount": 100
+    },
+    "fee": {
+      "chainId": "1",
+      "address": "0xA0b86a33E6E8c3c4e8a6C8d7f2b4A6f5B4A2cDcE",
+      "amount": 0.1,
+      "recipient": "0x742d35Cc6634C0532925a3b8D321a432E7Cc8b51"
+    },
+    "payment_mode": "x402"
+  }
+}

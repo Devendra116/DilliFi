@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  # Backend API Server
+  backend:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGODB_URL=${MONGODB_URL}
+      - FACILITATOR_URL=${FACILITATOR_URL:-https://x402.polygon.technology}
+      - PORT=3000
+    restart: unless-stopped
