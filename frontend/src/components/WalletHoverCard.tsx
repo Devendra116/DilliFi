@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { Copy, ExternalLink, LogOut, Loader2, Wallet } from "lucide-react@0.487.0";
+import { Copy, ExternalLink, LogOut, Loader2, Wallet } from "lucide-react";
 import { cn } from "./ui/utils";
 
 type TokenBalance = {
