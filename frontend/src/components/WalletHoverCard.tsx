@@ -3,7 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { Copy, ExternalLink, LogOut, Loader2, Wallet } from "lucide-react";
+import {
+  Copy,
+  ExternalLink,
+  LogOut,
+  Loader2,
+  Wallet,
+  User,
+  TrendingUp,
+} from "lucide-react";
 import { cn } from "./ui/utils";
 
 type TokenBalance = {
@@ -26,12 +34,22 @@ async function fetchAlchemyBalances(address: string, apiKey: string) {
     fetch(endpoint, {
       method: "POST",
       headers,
-      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_getBalance", params: [address, "latest"] }),
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "eth_getBalance",
+        params: [address, "latest"],
+      }),
     }),
     fetch(endpoint, {
       method: "POST",
       headers,
-      body: JSON.stringify({ jsonrpc: "2.0", id: 2, method: "alchemy_getTokenBalances", params: [address, "DEFAULT_TOKENS"] }),
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 2,
+        method: "alchemy_getTokenBalances",
+        params: [address, "DEFAULT_TOKENS"],
+      }),
     }),
   ]);
 
@@ -41,8 +59,13 @@ async function fetchAlchemyBalances(address: string, apiKey: string) {
   const nativeWei = BigInt(nativeJson?.result ?? "0x0");
   const nativeFormatted = Number(nativeWei) / 1e18;
 
-  const tokenBalances: Array<{ contractAddress: string; tokenBalance: string }> = tokensJson?.result?.tokenBalances ?? [];
-  const filtered = tokenBalances.filter((t) => t.tokenBalance && t.tokenBalance !== "0x0");
+  const tokenBalances: Array<{
+    contractAddress: string;
+    tokenBalance: string;
+  }> = tokensJson?.result?.tokenBalances ?? [];
+  const filtered = tokenBalances.filter(
+    (t) => t.tokenBalance && t.tokenBalance !== "0x0"
+  );
 
   // Fetch metadata per token
   const metas = await Promise.all(
@@ -50,8 +73,15 @@ async function fetchAlchemyBalances(address: string, apiKey: string) {
       fetch(endpoint, {
         method: "POST",
         headers,
-        body: JSON.stringify({ jsonrpc: "2.0", id: 100 + i, method: "alchemy_getTokenMetadata", params: [t.contractAddress] }),
-      }).then((r) => r.json()).catch(() => null)
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: 100 + i,
+          method: "alchemy_getTokenMetadata",
+          params: [t.contractAddress],
+        }),
+      })
+        .then((r) => r.json())
+        .catch(() => null)
     )
   );
 
@@ -75,8 +105,16 @@ async function fetchAlchemyBalances(address: string, apiKey: string) {
 
   // Native ETH first
   const all: TokenBalance[] = [
-    { symbol: "ETH", name: "Ethereum", amount: nativeFormatted.toFixed(4), logo: null },
-    ...tokens.filter((t) => Number(t.amount) > 0).sort((a, b) => Number(b.amount) - Number(a.amount)).slice(0, 10),
+    {
+      symbol: "ETH",
+      name: "Ethereum",
+      amount: nativeFormatted.toFixed(4),
+      logo: null,
+    },
+    ...tokens
+      .filter((t) => Number(t.amount) > 0)
+      .sort((a, b) => Number(b.amount) - Number(a.amount))
+      .slice(0, 10),
   ];
   return all;
 }
@@ -104,12 +142,20 @@ async function fetchCovalentBalances(address: string, apiKey: string) {
         amount,
       } as TokenBalance;
     })
-    .sort((a: TokenBalance, b: TokenBalance) => Number(b.amount) - Number(a.amount))
+    .sort(
+      (a: TokenBalance, b: TokenBalance) => Number(b.amount) - Number(a.amount)
+    )
     .slice(0, 12);
   return tokens;
 }
 
-export function WalletHoverCard({ address, onDisconnect }: { address?: string; onDisconnect: () => void }) {
+export function WalletHoverCard({
+  address,
+  onDisconnect,
+}: {
+  address?: string;
+  onDisconnect: () => void;
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tokens, setTokens] = useState<TokenBalance[]>([]);
@@ -130,7 +176,9 @@ export function WalletHoverCard({ address, onDisconnect }: { address?: string; o
         } else if (alchemyKey) {
           balances = await fetchAlchemyBalances(address, alchemyKey);
         } else {
-          throw new Error("Set NEXT_PUBLIC_COVALENT_API_KEY or NEXT_PUBLIC_ALCHEMY_API_KEY");
+          throw new Error(
+            "Set NEXT_PUBLIC_COVALENT_API_KEY or NEXT_PUBLIC_ALCHEMY_API_KEY"
+          );
         }
         if (mounted) setTokens(balances);
       } catch (e: any) {
@@ -149,8 +197,8 @@ export function WalletHoverCard({ address, onDisconnect }: { address?: string; o
     <div className="space-y-3">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
-          <div className="size-8 rounded-full bg-blue-600/10 flex items-center justify-center">
-            <Wallet className="size-4 text-blue-600" />
+          <div className="size-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white icon-tile">
+            <Wallet className="size-4" />
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-medium">Connected Wallet</span>
@@ -168,13 +216,12 @@ export function WalletHoverCard({ address, onDisconnect }: { address?: string; o
           >
             <Copy className="size-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            asChild
-            title="View on Etherscan"
-          >
-            <a href={`https://etherscan.io/address/${address}`} target="_blank" rel="noreferrer">
+          <Button variant="ghost" size="icon" asChild title="View on Etherscan">
+            <a
+              href={`https://etherscan.io/address/${address}`}
+              target="_blank"
+              rel="noreferrer"
+            >
               <ExternalLink className="size-4" />
             </a>
           </Button>
@@ -194,15 +241,24 @@ export function WalletHoverCard({ address, onDisconnect }: { address?: string; o
         ) : (
           <ul className="max-h-56 overflow-auto space-y-1">
             {tokens.map((t, idx) => (
-              <li key={`${t.symbol}-${idx}`} className="flex items-center justify-between gap-3 py-1">
+              <li
+                key={`${t.symbol}-${idx}`}
+                className="flex items-center justify-between gap-3 py-1"
+              >
                 <div className="flex items-center gap-2 min-w-0">
                   {t.logo ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={t.logo} alt={t.symbol} className="size-4 rounded" />
+                    <img
+                      src={t.logo}
+                      alt={t.symbol}
+                      className="size-4 rounded"
+                    />
                   ) : (
                     <div className="size-4 rounded bg-gray-200" />
                   )}
-                  <span className="text-sm font-medium truncate">{t.symbol}</span>
+                  <span className="text-sm font-medium truncate">
+                    {t.symbol}
+                  </span>
                 </div>
                 <span className="text-sm tabular-nums">{t.amount}</span>
               </li>
@@ -212,7 +268,7 @@ export function WalletHoverCard({ address, onDisconnect }: { address?: string; o
       </div>
 
       <div className="flex justify-end">
-        <Button variant="outline" size="sm" onClick={onDisconnect}>
+        <Button size="sm" onClick={onDisconnect}>
           <LogOut className="size-4 mr-2" /> Disconnect
         </Button>
       </div>
@@ -220,3 +276,65 @@ export function WalletHoverCard({ address, onDisconnect }: { address?: string; o
   );
 }
 
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+
+export function WalletPopover({
+  user,
+  onLogout,
+  onViewChange,
+}: {
+  user: { walletAddress?: string; id?: string };
+  onLogout: () => void;
+  onViewChange: (view: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          style={{ color: "black", background: "#FF7A00" }}
+          className="h-9 rounded-full px-3 flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-600 text-white"
+          onMouseEnter={() => setOpen(true)}
+          onClick={() => setOpen((v) => !v)}
+        >
+          <Wallet style={{ color: "black" }} className="w-4 h-4" />
+          <span className="font-medium">
+            {shorten(user.walletAddress || user.id, 6)}
+          </span>
+        </Button>
+      </PopoverTrigger>
+
+      <PopoverContent
+        align="end"
+        className="w-80"
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+      >
+        {/* Wallet balances + copy + disconnect */}
+        <WalletHoverCard address={user.walletAddress} onDisconnect={onLogout} />
+
+        {/* Extra actions */}
+        <div className="mt-3 pt-3 border-t flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onViewChange("profile")}
+          >
+            <User className="w-4 h-4 mr-2" /> Profile
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onViewChange("dashboard")}
+          >
+            <TrendingUp className="w-4 h-4 mr-2" /> Dashboard
+          </Button>
+          <Button size="sm" onClick={onLogout}>
+            <LogOut className="w-4 h-4 mr-2" /> Sign out
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
