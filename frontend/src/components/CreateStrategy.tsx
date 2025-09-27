@@ -6,6 +6,8 @@ import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
+import { SelfVerification } from './SelfVerification';
+import { SelfVerification } from './SelfVerification';
 import { 
   Select,
   SelectContent,
@@ -53,7 +55,9 @@ export function CreateStrategy({ user, onStrategyCreated }: CreateStrategyProps)
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  
+  const [isVerified, setIsVerified] = useState(false);
+  const [verifiedAddress, setVerifiedAddress] = useState<string | null>(null);
 
   const categories = [
     'Yield Farming',
@@ -153,6 +157,16 @@ export function CreateStrategy({ user, onStrategyCreated }: CreateStrategyProps)
       return;
     }
 
+    if (!isVerified) {
+      setError('Identity verification required: please verify age (18+) before creating a strategy.');
+      return;
+    }
+
+    if (!isVerified) {
+      setError('Identity verification required: please verify age (18+) before creating a strategy.');
+      return;
+    }
+
     setIsSubmitting(true);
     setError('');
 
@@ -221,6 +235,18 @@ export function CreateStrategy({ user, onStrategyCreated }: CreateStrategyProps)
           <p className="text-gray-600">
             Build and deploy your own automated trading strategy
           </p>
+        </div>
+
+        
+        <div className="mb-6 flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Verification status: {isVerified ? (
+              <span className="text-green-600">Verified{verifiedAddress ? ` (${verifiedAddress.slice(0, 6)}…${verifiedAddress.slice(-4)})` : ''}</span>
+            ) : (
+              <span className="text-red-600">Not verified</span>
+            )}
+          </div>
+          <SelfVerification onVerified={handleVerified} userAddress={user?.walletAddress ?? null} />
         </div>
 
         {success && (
