@@ -5,7 +5,7 @@ import { Marketplace } from './components/Marketplace';
 import { CreateStrategy } from './components/CreateStrategy';
 import { Dashboard } from './components/Dashboard';
 import { Toaster } from './components/ui/sonner';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { usePrivy, useLogin, useLogout } from '@privy-io/react-auth';
 
 export default function App() {
