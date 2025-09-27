@@ -7,7 +7,17 @@ import { Alert, AlertDescription } from "./ui/alert";
 import { Loader2, ShieldCheck, QrCode } from "lucide-react";
 import { SELF_CONFIG } from "@/config/self";
 import { SelfQRcodeWrapper, SelfAppBuilder } from "@selfxyz/qrcode";
-import { hashEndpointWithScope, formatEndpoint } from "@selfxyz/common";
+const formatEndpoint = (endpoint: string) => (endpoint || "").trim();
+const hashEndpointWithScope = (endpoint: string, scope: string) => {
+  const input = `${formatEndpoint(endpoint)}|${scope}`;
+  let hash = 5381;
+  for (let i = 0; i < input.length; i++) {
+    hash = (hash * 33) ^ input.charCodeAt(i);
+  }
+  // Return an 0x-prefixed hex string similar to on-chain hashes.
+  const hex = (hash >>> 0).toString(16).padStart(8, "0");
+  return `0x${hex}`;
+};
 
 type VerificationResult = {
   address?: string;
@@ -62,8 +72,13 @@ export function SelfVerification({ onVerified, disabled, userAddress }: Props) {
         endpointType: cfg.endpointType as any,
         userIdType: "hex" as const,
         userDefinedData: "EthGlobal Delhi demo",
+        expiry_date: true,
+        date_of_birth: true,
+
         disclosures: {
           minimumAge: 18,
+          ofac: false,
+          excludedCountries: [],
         },
       };
       const app = new SelfAppBuilder(appInput).build();
@@ -112,10 +127,14 @@ export function SelfVerification({ onVerified, disabled, userAddress }: Props) {
         <QrCode className="mr-2 h-4 w-4" /> Verify age with Self
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md theme-light">
           <DialogHeader>
-            <DialogTitle className="text-xl flex items-center">
-              <ShieldCheck className="mr-2 h-5 w-5" /> Identity Verification
+            <DialogTitle
+              style={{ color: "black" }}
+              className="text-xl flex items-center"
+            >
+              <ShieldCheck className="mr-2 h-5 w-5 text-black" /> Identity
+              Verification
             </DialogTitle>
           </DialogHeader>
 
