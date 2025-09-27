@@ -1,18 +1,23 @@
-import { useState, useEffect } from 'react';
-import { Header } from './components/Header';
-import { HomePage } from './components/HomePage';
-import { Marketplace } from './components/Marketplace';
-import { CreateStrategy } from './components/CreateStrategy';
-import { Dashboard } from './components/Dashboard';
-import { Toaster } from './components/ui/sonner';
-import { toast } from 'sonner';
-import { usePrivy, useLogin, useLogout } from '@privy-io/react-auth';
+import { useState, useEffect } from "react";
+import { Header } from "./components/Header";
+import { HomePage } from "./components/HomePage";
+import { Marketplace } from "./components/Marketplace";
+import { CreateStrategy } from "./components/CreateStrategy";
+import { Dashboard } from "./components/Dashboard";
+import { Toaster } from "./components/ui/sonner";
+import { toast } from "sonner";
+import { usePrivy, useLogin, useLogout } from "@privy-io/react-auth";
 
 export default function App() {
-  const [currentView, setCurrentView] = useState('home');
+  const [currentView, setCurrentView] = useState("home");
   const [user, setUser] = useState<any>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const { ready, authenticated, user: privyUser, getAccessToken } = (usePrivy() as any);
+  const {
+    ready,
+    authenticated,
+    user: privyUser,
+    getAccessToken,
+  } = usePrivy() as any;
   const { login } = useLogin();
   const { logout } = useLogout();
 
@@ -27,7 +32,7 @@ export default function App() {
           privyUser?.google?.name ||
           privyUser?.twitter?.username ||
           privyUser?.email?.address ||
-          'User',
+          "User",
         avatar:
           privyUser?.google?.pictureUrl ||
           privyUser?.twitter?.profilePictureUrl ||
@@ -47,7 +52,7 @@ export default function App() {
   useEffect(() => {
     const maybeGetToken = async () => {
       try {
-        if (typeof getAccessToken === 'function') {
+        if (typeof getAccessToken === "function") {
           const token = await getAccessToken();
           setAccessToken(token ?? null);
         }
@@ -62,13 +67,13 @@ export default function App() {
 
   const handleLogin = async () => {
     await login();
-    toast.success('Successfully signed in!');
+    toast.success("Successfully signed in!");
   };
 
   const handleLogout = async () => {
     await logout();
-    setCurrentView('home');
-    toast.success('Successfully signed out!');
+    setCurrentView("home");
+    toast.success("Successfully signed out!");
   };
 
   const handleShowAuth = async () => {
@@ -77,7 +82,7 @@ export default function App() {
 
   const handleViewChange = (view: string) => {
     // Redirect to auth if user tries to access protected routes
-    if ((view === 'create' || view === 'dashboard') && !user) {
+    if ((view === "create" || view === "dashboard") && !user) {
       void login();
       return;
     }
@@ -86,50 +91,40 @@ export default function App() {
 
   const handlePurchaseStrategy = (strategyId: string) => {
     if (!user) {
-      toast.error('Please sign in to purchase strategies');
+      toast.error("Please sign in to purchase strategies");
       void login();
       return;
     }
 
     // Simulate purchase process
-    toast.loading('Processing purchase...', { id: 'purchase' });
-    
+    toast.loading("Processing purchase...", { id: "purchase" });
+
     setTimeout(() => {
-      toast.success('Strategy purchased successfully!', { id: 'purchase' });
+      toast.success("Strategy purchased successfully!", { id: "purchase" });
       // In a real app, you would call the purchase API here
     }, 2000);
   };
 
   const handleStrategyCreated = (strategy: any) => {
-    toast.success('Strategy created and deployed successfully!');
-    setCurrentView('dashboard');
+    toast.success("Strategy created and deployed successfully!");
+    setCurrentView("dashboard");
   };
 
   const renderCurrentView = () => {
     switch (currentView) {
-      case 'home':
+      case "home":
         return <HomePage onViewChange={handleViewChange} />;
-      case 'marketplace':
+      case "marketplace":
+        return <Marketplace user={user} onPurchase={handlePurchaseStrategy} />;
+      case "create":
         return (
-          <Marketplace 
-            user={user} 
-            onPurchase={handlePurchaseStrategy}
-          />
-        );
-      case 'create':
-        return (
-          <CreateStrategy 
-            user={user} 
+          <CreateStrategy
+            user={user}
             onStrategyCreated={handleStrategyCreated}
           />
         );
-      case 'dashboard':
-        return (
-          <Dashboard 
-            user={user} 
-            onViewChange={handleViewChange}
-          />
-        );
+      case "dashboard":
+        return <Dashboard user={user} onViewChange={handleViewChange} />;
       default:
         return <HomePage onViewChange={handleViewChange} />;
     }
@@ -144,10 +139,7 @@ export default function App() {
         onLogin={handleShowAuth}
         onLogout={handleLogout}
       />
-      
-      <main>
-        {renderCurrentView()}
-      </main>
+      <main>{renderCurrentView()}</main>
 
       <Toaster position="top-right" />
     </div>

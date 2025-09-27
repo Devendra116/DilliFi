@@ -1,12 +1,18 @@
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Alert, AlertDescription } from './ui/alert';
-import { Loader2, Mail, Lock, User, Wallet } from 'lucide-react';
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Alert, AlertDescription } from "./ui/alert";
+import { Loader2, Mail, Lock, User, Wallet } from "lucide-react";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -16,65 +22,68 @@ interface AuthModalProps {
 
 export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
-    setError('');
+    setError("");
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       if (formData.password !== formData.confirmPassword) {
-        throw new Error('Passwords do not match');
+        throw new Error("Passwords do not match");
       }
 
       if (formData.password.length < 6) {
-        throw new Error('Password must be at least 6 characters');
+        throw new Error("Password must be at least 6 characters");
       }
 
-      const response = await fetch(`https://rvprdljvahpfqflvesmp.supabase.co/functions/v1/make-server-b4ccc00b/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2cHJkbGp2YWhwZnFmbHZlc21wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5NDU1MjUsImV4cCI6MjA3NDUyMTUyNX0.O6VTwlzXdtdQ-9PhrY4KGUd85V1XyF4xpI20BngEHKk`
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          name: formData.name
-        })
-      });
+      const response = await fetch(
+        `https://rvprdljvahpfqflvesmp.supabase.co/functions/v1/make-server-b4ccc00b/signup`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2cHJkbGp2YWhwZnFmbHZlc21wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5NDU1MjUsImV4cCI6MjA3NDUyMTUyNX0.O6VTwlzXdtdQ-9PhrY4KGUd85V1XyF4xpI20BngEHKk`,
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            name: formData.name,
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create account');
+        throw new Error(data.error || "Failed to create account");
       }
 
       const user = {
         id: data.user.id,
         email: formData.email,
         name: formData.name,
-        accessToken: data.access_token
+        accessToken: data.access_token,
       };
 
       onLogin(user);
       onClose();
-      setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+      setFormData({ name: "", email: "", password: "", confirmPassword: "" });
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -85,37 +94,40 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch(`https://rvprdljvahpfqflvesmp.supabase.co/functions/v1/make-server-b4ccc00b/signin`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2cHJkbGp2YWhwZnFmbHZlc21wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5NDU1MjUsImV4cCI6MjA3NDUyMTUyNX0.O6VTwlzXdtdQ-9PhrY4KGUd85V1XyF4xpI20BngEHKk`
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
-      });
+      const response = await fetch(
+        `https://rvprdljvahpfqflvesmp.supabase.co/functions/v1/make-server-b4ccc00b/signin`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2cHJkbGp2YWhwZnFmbHZlc21wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5NDU1MjUsImV4cCI6MjA3NDUyMTUyNX0.O6VTwlzXdtdQ-9PhrY4KGUd85V1XyF4xpI20BngEHKk`,
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to sign in');
+        throw new Error(data.error || "Failed to sign in");
       }
 
       const user = {
         id: data.user.id,
         email: data.user.email,
         name: data.user.user_metadata?.name || data.user.email,
-        accessToken: data.access_token
+        accessToken: data.access_token,
       };
 
       onLogin(user);
       onClose();
-      setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+      setFormData({ name: "", email: "", password: "", confirmPassword: "" });
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -127,20 +139,20 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
     setIsLoading(true);
     try {
       // Simulate wallet connection
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       const mockUser = {
-        id: 'wallet_user_' + Date.now(),
-        email: 'wallet@example.com',
-        name: 'Wallet User',
-        wallet: '0x1234...5678',
-        accessToken: 'mock_wallet_token'
+        id: "wallet_user_" + Date.now(),
+        email: "wallet@example.com",
+        name: "Wallet User",
+        wallet: "0x1234...5678",
+        accessToken: "mock_wallet_token",
       };
 
       onLogin(mockUser);
       onClose();
     } catch (err: any) {
-      setError('Failed to connect wallet');
+      setError("Failed to connect wallet");
     } finally {
       setIsLoading(false);
     }
@@ -150,7 +162,9 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center text-2xl">Welcome to StrategyForge</DialogTitle>
+          <DialogTitle className="text-center text-2xl">
+            Welcome to DilliFi
+          </DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="signin" className="w-full">
@@ -213,7 +227,7 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
                         Signing In...
                       </>
                     ) : (
-                      'Sign In'
+                      "Sign In"
                     )}
                   </Button>
                 </form>
@@ -226,7 +240,7 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
               <CardHeader>
                 <CardTitle>Create Account</CardTitle>
                 <CardDescription>
-                  Join StrategyForge and start your trading journey
+                  Join DilliFi and start your trading journey
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -307,7 +321,7 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
                         Creating Account...
                       </>
                     ) : (
-                      'Create Account'
+                      "Create Account"
                     )}
                   </Button>
                 </form>
@@ -321,12 +335,14 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            <span className="bg-background px-2 text-muted-foreground">
+              Or continue with
+            </span>
           </div>
         </div>
 
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           className="w-full"
           onClick={handleWalletConnect}
           disabled={isLoading}

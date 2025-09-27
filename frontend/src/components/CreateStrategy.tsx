@@ -1,152 +1,171 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Textarea } from './ui/textarea';
-import { Badge } from './ui/badge';
-import { Alert, AlertDescription } from './ui/alert';
-import { SelfVerification } from './SelfVerification';
-import { 
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
+import { Badge } from "./ui/badge";
+import { Alert, AlertDescription } from "./ui/alert";
+import { SelfVerification } from "./SelfVerification";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from './ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { 
-  Plus, 
-  X, 
-  Code, 
-  Settings, 
-  TrendingUp, 
+} from "./ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import {
+  Plus,
+  X,
+  Code,
+  Settings,
+  TrendingUp,
   AlertTriangle,
   CheckCircle,
-  Loader2
-} from 'lucide-react';
+  Loader2,
+} from "lucide-react";
 
 interface CreateStrategyProps {
   user: any;
   onStrategyCreated: (strategy: any) => void;
 }
 
-export function CreateStrategy({ user, onStrategyCreated }: CreateStrategyProps) {
+export function CreateStrategy({
+  user,
+  onStrategyCreated,
+}: CreateStrategyProps) {
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    category: '',
-    riskLevel: '',
-    price: '',
-    priceToken: 'ETH',
-    priceTokenOther: '',
+    name: "",
+    description: "",
+    category: "",
+    riskLevel: "",
+    price: "",
+    priceToken: "ETH",
+    priceTokenOther: "",
     tags: [] as string[],
-    code: '',
-    parameters: [] as { name: string; type: string; defaultValue: string; description: string }[]
+    code: "",
+    parameters: [] as {
+      name: string;
+      type: string;
+      defaultValue: string;
+      description: string;
+    }[],
   });
-  
-  const [currentTag, setCurrentTag] = useState('');
+
+  const [currentTag, setCurrentTag] = useState("");
+  const [success, setSuccess] = useState(false);
+
   const [currentParam, setCurrentParam] = useState({
-    name: '',
-    type: 'number',
-    defaultValue: '',
-    description: ''
+    name: "",
+    type: "number",
+    defaultValue: "",
+    description: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  
+  const [error, setError] = useState("");
+
   const [isVerified, setIsVerified] = useState(false);
   const [verifiedAddress, setVerifiedAddress] = useState<string | null>(null);
 
   const categories = [
-    'Yield Farming',
-    'Arbitrage',
-    'Scalping',
-    'Grid Trading',
-    'Mean Reversion',
-    'Momentum',
-    'Market Making',
-    'Options',
-    'NFT',
-    'Other'
+    "Yield Farming",
+    "Arbitrage",
+    "Scalping",
+    "Grid Trading",
+    "Mean Reversion",
+    "Momentum",
+    "Market Making",
+    "Options",
+    "NFT",
+    "Other",
   ];
 
-  const riskLevels = ['Low', 'Medium', 'High'];
-  const paramTypes = ['number', 'string', 'boolean', 'percentage'];
+  const riskLevels = ["Low", "Medium", "High"];
+  const paramTypes = ["number", "string", "boolean", "percentage"];
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData(prev => ({
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
-    setError('');
+    setError("");
   };
 
   const handleSelectChange = (field: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
-    setError('');
+    setError("");
   };
 
   const addTag = () => {
     if (currentTag && !formData.tags.includes(currentTag)) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        tags: [...prev.tags, currentTag]
+        tags: [...prev.tags, currentTag],
       }));
-      setCurrentTag('');
+      setCurrentTag("");
     }
   };
 
   const removeTag = (tagToRemove: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
+      tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
   };
 
   const addParameter = () => {
     if (currentParam.name && currentParam.defaultValue) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        parameters: [...prev.parameters, { ...currentParam }]
+        parameters: [...prev.parameters, { ...currentParam }],
       }));
       setCurrentParam({
-        name: '',
-        type: 'number',
-        defaultValue: '',
-        description: ''
+        name: "",
+        type: "number",
+        defaultValue: "",
+        description: "",
       });
     }
   };
 
   const removeParameter = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      parameters: prev.parameters.filter((_, i) => i !== index)
+      parameters: prev.parameters.filter((_, i) => i !== index),
     }));
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) return 'Strategy name is required';
-    if (!formData.description.trim()) return 'Description is required';
-    if (!formData.category) return 'Category is required';
-    if (!formData.riskLevel) return 'Risk level is required';
-    if (!formData.price.trim()) return 'Price is required';
-    if (!formData.priceToken) return 'Price token is required';
-    if (formData.priceToken === 'OTHER' && !formData.priceTokenOther.trim()) return 'Please provide a token symbol';
-    if (!formData.code.trim()) return 'Strategy code is required';
-    
+    if (!formData.name.trim()) return "Strategy name is required";
+    if (!formData.description.trim()) return "Description is required";
+    if (!formData.category) return "Category is required";
+    if (!formData.riskLevel) return "Risk level is required";
+    if (!formData.price.trim()) return "Price is required";
+    if (!formData.priceToken) return "Price token is required";
+    if (formData.priceToken === "OTHER" && !formData.priceTokenOther.trim())
+      return "Please provide a token symbol";
+    if (!formData.code.trim()) return "Strategy code is required";
+
     return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) {
-      setError('Please sign in to create a strategy');
+      setError("Please sign in to create a strategy");
       return;
     }
 
@@ -157,53 +176,58 @@ export function CreateStrategy({ user, onStrategyCreated }: CreateStrategyProps)
     }
 
     if (!isVerified) {
-      setError('Identity verification required: please verify age (18+) before creating a strategy.');
+      setError(
+        "Identity verification required: please verify age (18+) before creating a strategy."
+      );
       return;
     }
 
     if (!isVerified) {
-      setError('Identity verification required: please verify age (18+) before creating a strategy.');
+      setError(
+        "Identity verification required: please verify age (18+) before creating a strategy."
+      );
       return;
     }
 
     setIsSubmitting(true);
-    setError('');
+    setError("");
 
     try {
       // Local mock: create strategy object without Supabase
       await new Promise((r) => setTimeout(r, 500));
-      const strategyId = 'strategy_' + Date.now();
+      const strategyId = "strategy_" + Date.now();
       const strategy = {
         id: strategyId,
         ...formData,
         priceToken:
-          formData.priceToken === 'OTHER' ? formData.priceTokenOther : formData.priceToken,
+          formData.priceToken === "OTHER"
+            ? formData.priceTokenOther
+            : formData.priceToken,
         creator: user.name || user.email,
         creatorId: user.id,
         createdAt: new Date().toISOString(),
-        status: 'active',
-        performance: '+0.0%',
+        status: "active",
+        performance: "+0.0%",
         users: 0,
-        totalValue: '$0',
+        totalValue: "$0",
       };
 
       setSuccess(true);
       onStrategyCreated(strategy);
-      
+
       // Reset form
       setFormData({
-        name: '',
-        description: '',
-        category: '',
-        riskLevel: '',
-        price: '',
-        priceToken: 'ETH',
-        priceTokenOther: '',
+        name: "",
+        description: "",
+        category: "",
+        riskLevel: "",
+        price: "",
+        priceToken: "ETH",
+        priceTokenOther: "",
         tags: [],
-        code: '',
-        parameters: []
+        code: "",
+        parameters: [],
       });
-
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -226,33 +250,53 @@ export function CreateStrategy({ user, onStrategyCreated }: CreateStrategyProps)
     );
   }
 
+  function handleVerified(result?: { address?: string }) {
+    setIsVerified(true);
+    if (result?.address) {
+      setVerifiedAddress(result.address);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Trading Strategy</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Create Trading Strategy
+          </h1>
           <p className="text-gray-600">
             Build and deploy your own automated trading strategy
           </p>
         </div>
-
-        
+        {/* <SelfVerification1 /> */}
         <div className="mb-6 flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            Verification status: {isVerified ? (
-              <span className="text-green-600">Verified{verifiedAddress ? ` (${verifiedAddress.slice(0, 6)}…${verifiedAddress.slice(-4)})` : ''}</span>
+            Verification status:{" "}
+            {isVerified ? (
+              <span className="text-green-600">
+                Verified
+                {verifiedAddress
+                  ? ` (${verifiedAddress.slice(0, 6)}…${verifiedAddress.slice(
+                      -4
+                    )})`
+                  : ""}
+              </span>
             ) : (
               <span className="text-red-600">Not verified</span>
             )}
           </div>
-          <SelfVerification onVerified={handleVerified} userAddress={user?.walletAddress ?? null} />
+          <SelfVerification
+            onVerified={handleVerified}
+            userAddress={user?.walletAddress ?? null}
+          />
         </div>
 
         {success && (
           <Alert className="mb-6 border-green-200 bg-green-50">
             <CheckCircle className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-700">
-              Strategy created successfully! It's now available in the marketplace.
+              Strategy created successfully! It's now available in the
+              marketplace.
             </AlertDescription>
           </Alert>
         )}
@@ -306,7 +350,9 @@ export function CreateStrategy({ user, onStrategyCreated }: CreateStrategyProps)
                         />
                         <Select
                           value={formData.priceToken}
-                          onValueChange={(value) => handleSelectChange('priceToken', value)}
+                          onValueChange={(value) =>
+                            handleSelectChange("priceToken", value)
+                          }
                         >
                           <SelectTrigger className="w-36">
                             <SelectValue placeholder="Token" />
@@ -321,9 +367,11 @@ export function CreateStrategy({ user, onStrategyCreated }: CreateStrategyProps)
                           </SelectContent>
                         </Select>
                       </div>
-                      {formData.priceToken === 'OTHER' && (
+                      {formData.priceToken === "OTHER" && (
                         <div className="mt-2">
-                          <Label htmlFor="priceTokenOther">Custom token symbol</Label>
+                          <Label htmlFor="priceTokenOther">
+                            Custom token symbol
+                          </Label>
                           <Input
                             id="priceTokenOther"
                             name="priceTokenOther"
@@ -352,9 +400,11 @@ export function CreateStrategy({ user, onStrategyCreated }: CreateStrategyProps)
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <Label>Category</Label>
-                      <Select 
-                        value={formData.category} 
-                        onValueChange={(value) => handleSelectChange('category', value)}
+                      <Select
+                        value={formData.category}
+                        onValueChange={(value) =>
+                          handleSelectChange("category", value)
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select category" />
@@ -370,9 +420,11 @@ export function CreateStrategy({ user, onStrategyCreated }: CreateStrategyProps)
                     </div>
                     <div>
                       <Label>Risk Level</Label>
-                      <Select 
-                        value={formData.riskLevel} 
-                        onValueChange={(value) => handleSelectChange('riskLevel', value)}
+                      <Select
+                        value={formData.riskLevel}
+                        onValueChange={(value) =>
+                          handleSelectChange("riskLevel", value)
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select risk level" />
@@ -395,7 +447,9 @@ export function CreateStrategy({ user, onStrategyCreated }: CreateStrategyProps)
                         placeholder="Add a tag..."
                         value={currentTag}
                         onChange={(e) => setCurrentTag(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                        onKeyPress={(e) =>
+                          e.key === "Enter" && (e.preventDefault(), addTag())
+                        }
                       />
                       <Button type="button" onClick={addTag} variant="outline">
                         <Plus className="w-4 h-4" />
@@ -403,7 +457,11 @@ export function CreateStrategy({ user, onStrategyCreated }: CreateStrategyProps)
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {formData.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="flex items-center space-x-1">
+                        <Badge
+                          key={tag}
+                          variant="secondary"
+                          className="flex items-center space-x-1"
+                        >
                           <span>{tag}</span>
                           <button
                             type="button"
@@ -439,14 +497,21 @@ export function CreateStrategy({ user, onStrategyCreated }: CreateStrategyProps)
                         id="param-name"
                         placeholder="e.g., stopLoss"
                         value={currentParam.name}
-                        onChange={(e) => setCurrentParam(prev => ({ ...prev, name: e.target.value }))}
+                        onChange={(e) =>
+                          setCurrentParam((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
                       />
                     </div>
                     <div>
                       <Label>Type</Label>
-                      <Select 
-                        value={currentParam.type} 
-                        onValueChange={(value) => setCurrentParam(prev => ({ ...prev, type: value }))}
+                      <Select
+                        value={currentParam.type}
+                        onValueChange={(value) =>
+                          setCurrentParam((prev) => ({ ...prev, type: value }))
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -466,7 +531,12 @@ export function CreateStrategy({ user, onStrategyCreated }: CreateStrategyProps)
                         id="param-default"
                         placeholder="e.g., 5"
                         value={currentParam.defaultValue}
-                        onChange={(e) => setCurrentParam(prev => ({ ...prev, defaultValue: e.target.value }))}
+                        onChange={(e) =>
+                          setCurrentParam((prev) => ({
+                            ...prev,
+                            defaultValue: e.target.value,
+                          }))
+                        }
                       />
                     </div>
                     <div>
@@ -475,11 +545,21 @@ export function CreateStrategy({ user, onStrategyCreated }: CreateStrategyProps)
                         id="param-description"
                         placeholder="Brief description"
                         value={currentParam.description}
-                        onChange={(e) => setCurrentParam(prev => ({ ...prev, description: e.target.value }))}
+                        onChange={(e) =>
+                          setCurrentParam((prev) => ({
+                            ...prev,
+                            description: e.target.value,
+                          }))
+                        }
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <Button type="button" onClick={addParameter} variant="outline" className="w-full">
+                      <Button
+                        type="button"
+                        onClick={addParameter}
+                        variant="outline"
+                        className="w-full"
+                      >
                         <Plus className="w-4 h-4 mr-2" />
                         Add Parameter
                       </Button>
@@ -490,13 +570,22 @@ export function CreateStrategy({ user, onStrategyCreated }: CreateStrategyProps)
                     <div className="space-y-2">
                       <h4 className="font-medium">Configured Parameters</h4>
                       {formData.parameters.map((param, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-white border rounded-lg">
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-3 bg-white border rounded-lg"
+                        >
                           <div>
                             <span className="font-medium">{param.name}</span>
-                            <span className="text-gray-500 ml-2">({param.type})</span>
-                            <span className="text-gray-600 ml-2">= {param.defaultValue}</span>
+                            <span className="text-gray-500 ml-2">
+                              ({param.type})
+                            </span>
+                            <span className="text-gray-600 ml-2">
+                              = {param.defaultValue}
+                            </span>
                             {param.description && (
-                              <p className="text-sm text-gray-600 mt-1">{param.description}</p>
+                              <p className="text-sm text-gray-600 mt-1">
+                                {param.description}
+                              </p>
                             )}
                           </div>
                           <Button
@@ -565,7 +654,9 @@ async function placeBuyOrder(amount) {
                       required
                     />
                     <p className="text-sm text-gray-600">
-                      Your strategy should export an <code>executeStrategy</code> function that accepts the configured parameters.
+                      Your strategy should export an{" "}
+                      <code>executeStrategy</code> function that accepts the
+                      configured parameters.
                     </p>
                   </div>
                 </CardContent>
@@ -574,11 +665,15 @@ async function placeBuyOrder(amount) {
           </Tabs>
 
           <div className="flex justify-end space-x-4 mt-8">
-            <Button type="button" variant="outline" onClick={() => window.history.back()}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => window.history.back()}
+            >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isSubmitting}
               className="bg-gradient-to-r from-blue-600 to-purple-600"
             >
