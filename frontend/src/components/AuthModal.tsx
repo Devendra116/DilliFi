@@ -160,7 +160,7 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-neutral-900 text-neutral-100 border border-neutral-800">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl">
             Welcome to DilliFi
