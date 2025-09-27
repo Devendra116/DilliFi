@@ -96,12 +96,43 @@ export function SelfVerification({ onVerified, disabled, userAddress }: Props) {
           </DialogHeader>
 
           {sdkMissing && (
-            <Alert className="mb-3" variant="destructive">
-              <AlertDescription>
-                Self QRCode SDK not detected. To enable live verification, add the SDK per
-                Self docs. Meanwhile, you can proceed in mock mode.
-              </AlertDescription>
-            </Alert>
+            <div className="space-y-3">
+              <Alert className="" variant="destructive">
+                <AlertDescription>
+                  Self QRCode SDK not detected. To enable live verification, add the SDK per
+                  Self docs. Meanwhile, you can proceed in mock mode.
+                </AlertDescription>
+              </Alert>
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => {
+                    setError(null);
+                    setVerifying(true);
+                    setTimeout(() => {
+                      onVerified({
+                        address: userAddress ?? undefined,
+                        scope: config.scope,
+                        passed: true,
+                        raw: { mock: true },
+                      });
+                      setVerifying(false);
+                      setOpen(false);
+                    }, 500);
+                  }}
+                  disabled={verifying}
+                >
+                  {verifying ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verifying…
+                    </>
+                  ) : (
+                    <>Use Mock Verification</>
+                  )}
+                </Button>
+              </div>
+            </div>
           )}
 
           {error && (
