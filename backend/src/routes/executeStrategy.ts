@@ -11,12 +11,12 @@ export const executeStrategy = async (req: Request, res: Response) => {
     const { triggerId, strategyId } = req.body;
 
     // Validate required fields
-    if (!triggerId) {
-      return res.status(400).json({
-        success: false,
-        error: "triggerId is required",
-      });
-    }
+    // if (!triggerId) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     error: "triggerId is required",
+    //   });
+    // }
 
     if (!strategyId) {
       return res.status(400).json({

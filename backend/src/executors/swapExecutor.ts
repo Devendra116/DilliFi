@@ -1,18 +1,19 @@
-import { encodeFunctionData } from 'viem';
-import { SwapStep } from '../utils/schemas/uniswap';
+import { encodeFunctionData } from "viem";
+import { SwapStep } from "../utils/schemas/uniswap";
 import {
   UNISWAP_V2_ROUTER_ABI,
   UNISWAP_V3_ROUTER_ABI,
   CONTRACTS,
-  walletClient
-} from '../config/web3';
+  walletClient,
+  publicClient,
+} from "../config/web3";
 import {
   ExecutionResult,
   waitForTransaction,
   parseAddress,
   parseAmount,
-  getDeadline
-} from '../utils/transactionHelper';
+  getDeadline,
+} from "../utils/transactionHelper";
 
 /**
  * Execute Uniswap token swap
@@ -29,7 +30,9 @@ export async function executeSwap(step: SwapStep): Promise<ExecutionResult> {
     });
 
     if (!walletClient) {
-      throw new Error('Wallet client not initialized - check PRIVATE_KEY environment variable');
+      throw new Error(
+        "Wallet client not initialized - check PRIVATE_KEY environment variable"
+      );
     }
 
     const tokenInAddress = parseAddress(step.token_in);
@@ -37,24 +40,27 @@ export async function executeSwap(step: SwapStep): Promise<ExecutionResult> {
     const amountIn = parseAmount(step.amount_in);
     const amountOutMin = parseAmount(step.amount_out_min);
     const recipientAddress = parseAddress(step.recipient);
-    const deadline = step.deadline ? parseAmount(step.deadline) : getDeadline(20);
+    // const deadline = step.deadline ? parseAmount(step.deadline) : getDeadline(20);
+    const deadline = (await publicClient.getBlock()).timestamp + 200n;
 
     let data: `0x${string}`;
     let routerAddress: `0x${string}`;
 
-    if (step.version === 'v2') {
+    if (step.version === "v2") {
       routerAddress = CONTRACTS.UNISWAP_V3_ROUTER as `0x${string}`; // Using V3 router for now
 
       // Build path array - default to direct swap if no path provided
-      const path = step.path ? step.path.map(parseAddress) : [tokenInAddress, tokenOutAddress];
+      const path = step.path
+        ? step.path.map(parseAddress)
+        : [tokenInAddress, tokenOutAddress];
 
       // Encode V2 swap function
       data = encodeFunctionData({
         abi: UNISWAP_V2_ROUTER_ABI,
-        functionName: 'swapExactTokensForTokens',
+        functionName: "swapExactTokensForTokens",
         args: [amountIn, amountOutMin, path, recipientAddress, deadline],
       });
-    } else if (step.version === 'v3') {
+    } else if (step.version === "v3") {
       routerAddress = CONTRACTS.UNISWAP_V3_ROUTER as `0x${string}`;
 
       // For V3, use exactInputSingle with default fee tier
@@ -74,7 +80,7 @@ export async function executeSwap(step: SwapStep): Promise<ExecutionResult> {
       // Encode V3 swap function
       data = encodeFunctionData({
         abi: UNISWAP_V3_ROUTER_ABI,
-        functionName: 'exactInputSingle',
+        functionName: "exactInputSingle",
         args: [swapParams],
       });
     } else {
@@ -93,18 +99,19 @@ export async function executeSwap(step: SwapStep): Promise<ExecutionResult> {
     const result = await waitForTransaction(hash);
 
     if (result.success) {
-      console.log(`✅ Swap successful: ${step.token_in.address} → ${step.token_out.address}`);
+      console.log(
+        `✅ Swap successful: ${step.token_in.address} → ${step.token_out.address}`
+      );
     } else {
       console.log(`❌ Swap failed: ${result.error}`);
     }
 
     return result;
-
   } catch (error: any) {
-    console.error('❌ Swap execution failed:', error);
+    console.error("❌ Swap execution failed:", error);
     return {
       success: false,
-      error: error.message || 'Swap execution failed',
+      error: error.message || "Swap execution failed",
     };
   }
 }
