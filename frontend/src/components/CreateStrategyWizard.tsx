@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -12,6 +12,8 @@ import { Alert, AlertDescription } from "./ui/alert";
 import { Progress } from "./ui/progress";
 import { createStrategy, ChainAddress, StrategyTrigger, ExecutionStep } from "@/lib/strategiesApi";
 import { AlertTriangle, Check, ChevronLeft, ChevronRight, Loader2, Play } from "lucide-react";
+import { SelfVerification } from "./SelfVerification";
+import { isHumanOnChain } from "@/lib/selfContract";
 
 type UserLike = {
   id?: string;
@@ -32,6 +34,9 @@ export function CreateStrategyWizard({
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  const [checkingOnChain, setCheckingOnChain] = useState(false);
+  const [verifiedAddress, setVerifiedAddress] = useState<string | null>(null);
 
   // Step 1: Basic info
   const [name, setName] = useState("");
@@ -81,6 +86,28 @@ export function CreateStrategyWizard({
   const [feeRecipient, setFeeRecipient] = useState<string>(user?.walletAddress || "");
   const [paymentMode, setPaymentMode] = useState<string>("x402");
 
+  // Check on-chain verification status (Self verifier contract)
+  useEffect(() => {
+    let mounted = true;
+    const run = async () => {
+      if (!user?.walletAddress) return;
+      setCheckingOnChain(true);
+      try {
+        const ok = await isHumanOnChain(user.walletAddress);
+        if (mounted) {
+          setIsVerified((prev) => prev || ok);
+          if (ok) setVerifiedAddress(user.walletAddress);
+        }
+      } finally {
+        if (mounted) setCheckingOnChain(false);
+      }
+    };
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, [user?.walletAddress]);
+
   const canNext = useMemo(() => {
     if (step === 1) return name.trim().length > 0 && desc.trim().length > 0;
     if (step === 2) {
@@ -111,6 +138,12 @@ export function CreateStrategyWizard({
     const fracPadded = (frac + "0".repeat(18)).slice(0, 18);
     const big = BigInt(whole || "0") * 10n ** 18n + BigInt(fracPadded || "0");
     return big.toString();
+  }
+
+  function handleVerified() {
+    setIsVerified(true);
+    if (user?.walletAddress) setVerifiedAddress(user.walletAddress);
+    setError(null);
   }
 
   function toTokenDecimals(amount: string, decimals: number): string {
@@ -198,6 +231,10 @@ export function CreateStrategyWizard({
         setError("Please connect your wallet to continue.");
         return;
       }
+      if (!isVerified) {
+        setError("Identity verification required: please verify age (18+) before creating a strategy.");
+        return;
+      }
       // Basic client-side validation to prevent 400s from backend
       if (!isAddress(assetAddress)) return setError("Asset address is invalid.");
       if (!isAddress(routerAddress)) return setError("Router address is invalid.");
@@ -227,11 +264,11 @@ export function CreateStrategyWizard({
           ],
           max_supply: { chainId: assetChainId, address: maxSupplyToken, amount: Number(maxSupplyAmount) },
           fee: { chainId: assetChainId, address: feeToken, amount: Number(feeAmount), recipient: feeRecipient || user.walletAddress },
-          payment_mode: paymentMode,
-        },
-      };
-      const res = await createStrategy(req as any);
-      onStrategyCreated(res);
+        payment_mode: paymentMode,
+      },
+    };
+    const res = await createStrategy(req as any);
+    onStrategyCreated(res);
     } catch (e: any) {
       setError(e?.message || "Failed to create strategy");
     } finally {
@@ -323,6 +360,19 @@ export function CreateStrategyWizard({
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+              <div className="flex items-center justify-between rounded-md border border-neutral-800 bg-neutral-900 p-3">
+                <div className="text-sm text-muted-foreground">
+                  Verification status:{" "}
+                  {isVerified ? (
+                    <span className="text-green-500">
+                      Verified{verifiedAddress ? ` (${verifiedAddress.slice(0, 6)}…${verifiedAddress.slice(-4)})` : ""}
+                    </span>
+                  ) : (
+                    <span className="text-red-500">{checkingOnChain ? "Checking…" : "Not verified"}</span>
+                  )}
+                </div>
+                <SelfVerification onVerified={handleVerified} userAddress={user?.walletAddress || null} />
               </div>
             </CardContent>
           </Card>

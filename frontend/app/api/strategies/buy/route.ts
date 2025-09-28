@@ -35,7 +35,15 @@ async function postImpl(req: NextRequest) {
     }
     const account = privateKeyToAccount(pk.startsWith("0x") ? (pk as `0x${string}`) : (`0x${pk}` as `0x${string}`));
     const walletClient = createWalletClient({ account, chain: polygonAmoy, transport: http() });
-    const fetchWithPayment = wrapFetchWithPayment(fetch, walletClient);
+    // Prefer only Polygon Amoy payment requirements when multiple networks are offered
+    const selector = (requirements: any[]) => {
+      const preferred = requirements.find((r) => r.network === 'polygon-amoy')
+      if (!preferred) {
+        throw new Error('No acceptable x402 payment requirement for polygon-amoy')
+      }
+      return preferred
+    }
+    const fetchWithPayment = wrapFetchWithPayment(fetch, walletClient, undefined, selector as any);
 
     const raw = await req.text();
     let json: any = undefined;
