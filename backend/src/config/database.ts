@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 export const databaseConfig = {
-  url: process.env.MONGODB_URL || 'mongodb+srv://dbuser:testing123@cluster0.evaue1t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
+  url: process.env.MONGODB_URL,
   options: {
     maxPoolSize: 10,
     serverSelectionTimeoutMS: 5000,
