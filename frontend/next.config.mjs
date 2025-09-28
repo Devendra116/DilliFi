@@ -2,6 +2,14 @@ import path from 'path'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'https://ethglobal-delhi.onrender.com/api/:path*',
+      },
+    ]
+  },
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -50,4 +58,3 @@ const nextConfig = {
 }
 
 export default nextConfig
-

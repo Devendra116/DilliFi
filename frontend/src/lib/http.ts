@@ -8,8 +8,9 @@ export class ApiError extends Error {
   }
 }
 
-export const API_BASE =
-  (process.env.NEXT_PUBLIC_API_BASE_URL || "https://ethglobal-delhi.onrender.com").replace(/\/$/, "");
+// Always use same-origin '/api' so Next.js route handlers proxy cross-origin
+// requests on the server side. This eliminates browser CORS entirely.
+export const API_BASE = "/api";
 
 type FetchOptions = RequestInit & { json?: any };
 
@@ -18,7 +19,11 @@ export async function apiFetch<T = any>(path: string, opts: FetchOptions = {}) {
     'content-type': 'application/json',
     ...(opts.headers as Record<string, string> | undefined),
   };
-  const url = `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
+  // Normalize incoming path: allow '/api/strategies' or 'strategies'
+  const trimmed = (path || '').trim();
+  const withoutApi = trimmed.replace(/^\/?api\//, '');
+  const normalized = withoutApi.replace(/^\/+/, '');
+  const url = `${API_BASE}/${normalized}`;
   const init: RequestInit = {
     ...opts,
     headers,
@@ -34,4 +39,3 @@ export async function apiFetch<T = any>(path: string, opts: FetchOptions = {}) {
   }
   return data as T;
 }
-
