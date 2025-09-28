@@ -1,13 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
-import { paymentMiddleware } from "x402-next";
+import { wrapFetchWithPayment, decodeXPaymentResponse } from "x402-fetch";
+import { createWalletClient, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+
+// Minimal Polygon Amoy chain config (viem v1 compatible)
+const polygonAmoy = {
+  id: 80002,
+  name: "Polygon Amoy",
+  network: "polygon-amoy",
+  nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://rpc-amoy.polygon.technology"] },
+    public: { http: ["https://rpc-amoy.polygon.technology"] },
+  },
+  blockExplorers: {
+    default: { name: "PolygonScan", url: "https://amoy.polygonscan.com" },
+  },
+  testnet: true as const,
+} as const;
 
 const BACKEND = (
   process.env.BACKEND_ORIGIN || "https://ethglobal-delhi.onrender.com"
 ).replace(/\/$/, "");
 
 async function postImpl(req: NextRequest) {
-  // Allow a development bypass to keep the demo flowing without x402 setup
   try {
+    // Build a wallet client for Polygon Amoy using server PRIVATE_KEY
+    const pk = process.env.PRIVATE_KEY;
+    if (!pk) {
+      return NextResponse.json(
+        { success: false, error: "Server PRIVATE_KEY not configured" },
+        { status: 500 }
+      );
+    }
+    const account = privateKeyToAccount(pk.startsWith("0x") ? (pk as `0x${string}`) : (`0x${pk}` as `0x${string}`));
+    const walletClient = createWalletClient({ account, chain: polygonAmoy, transport: http() });
+    const fetchWithPayment = wrapFetchWithPayment(fetch, walletClient);
+
     const raw = await req.text();
     let json: any = undefined;
     try {
@@ -25,14 +54,20 @@ async function postImpl(req: NextRequest) {
       req.headers.get("x-payment") || req.headers.get("X-PAYMENT");
     if (hdrPayment) headers["X-PAYMENT"] = String(hdrPayment);
     if (json?.xPayment) headers["X-PAYMENT"] = String(json.xPayment);
-
-    const r = await fetch(`${BACKEND}/api/strategies/buy`, {
+    const r = await fetchWithPayment(`${BACKEND}/api/strategies/buy`, {
       method: "POST",
       headers,
       body: raw,
       cache: "no-store",
     });
     const text = await r.text();
+    try {
+      const payRespHeader = r.headers.get("x-payment-response");
+      if (payRespHeader) {
+        const decoded = decodeXPaymentResponse(payRespHeader);
+        console.log("x402 payment settled:", decoded);
+      }
+    } catch {}
     console.log("buy response", r.status, text);
     return new NextResponse(text, {
       status: r.status,
@@ -49,7 +84,7 @@ async function postImpl(req: NextRequest) {
 // Wrap with x402 payment handling middleware
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - types depend on x402-next package
-export const POST = paymentMiddleware(postImpl);
+export const POST = postImpl;
 
 export function OPTIONS() {
   return NextResponse.json({}, { status: 204 });

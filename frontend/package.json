@@ -49,6 +49,7 @@
         "tailwind-merge": "*",
         "vaul": "^1.1.2",
         "viem": "1.21.4",
+        "x402-fetch": "^0.6.0",
         "x402-next": "^0.1.0"
     },
     "devDependencies": {
