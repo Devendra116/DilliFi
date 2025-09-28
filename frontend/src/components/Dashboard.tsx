@@ -26,76 +26,90 @@ export function Dashboard({ user, onViewChange }: DashboardProps) {
   const [activeStrategies, setActiveStrategies] = useState<any[]>([]);
   const [purchasedStrategies, setPurchasedStrategies] = useState<any[]>([]);
   const [portfolio, setPortfolio] = useState({
-    totalValue: 127450,
-    dailyChange: 3120,
-    dailyChangePercent: 2.5,
-    totalStrategies: 8,
-    activeStrategies: 5,
-    totalEarnings: 45230
+    totalValue: 0,
+    dailyChange: 0,
+    dailyChangePercent: 0,
+    totalStrategies: 0,
+    activeStrategies: 0,
+    totalEarnings: 0,
   });
 
-  // Mock data - in a real app, this would come from your backend
+  // Load user's created strategies and purchases from API
   useEffect(() => {
-    // Simulate loading user's strategies and purchases
-    const mockActiveStrategies = [
-      {
-        id: '1',
-        name: 'My DeFi Yield Strategy',
-        status: 'running',
-        performance: '+15.3%',
-        dailyPnL: '+$1,245',
-        totalValue: '$12,450',
-        startedAt: '2024-01-15',
-        users: 45
-      },
-      {
-        id: '2',
-        name: 'Arbitrage Bot v2',
-        status: 'paused',
-        performance: '+8.7%',
-        dailyPnL: '+$234',
-        totalValue: '$5,670',
-        startedAt: '2024-02-01',
-        users: 23
-      },
-      {
-        id: '3',
-        name: 'Grid Trading Pro',
-        status: 'running',
-        performance: '+22.1%',
-        dailyPnL: '+$876',
-        totalValue: '$8,900',
-        startedAt: '2024-01-20',
-        users: 67
-      }
-    ];
+    let cancelled = false;
+    async function load() {
+      try {
+        const { listStrategies, getUserPurchases } = await import("@/lib/strategiesApi");
 
-    const mockPurchasedStrategies = [
-      {
-        id: '4',
-        name: 'Momentum Scalper',
-        creator: 'TechAnalyst',
-        performance: '+18.5%',
-        dailyPnL: '+$567',
-        totalInvested: '$3,000',
-        purchasedAt: '2024-02-15',
-        status: 'running'
-      },
-      {
-        id: '5',
-        name: 'Mean Reversion Pro',
-        creator: 'StatArb',
-        performance: '+12.3%',
-        dailyPnL: '+$123',
-        totalInvested: '$1,500',
-        purchasedAt: '2024-02-20',
-        status: 'running'
-      }
-    ];
+        // Load all strategies and filter by creator address
+        const all: any[] = await listStrategies();
+        const me = (user?.walletAddress || "").toLowerCase();
+        const mine = (Array.isArray(all) ? all : []).filter((item: any) => {
+          const s = item?.strategy ?? item;
+          const creator = (s?.creator?.address || item?.userAddress || s?.creator || "").toLowerCase();
+          return me && creator === me;
+        });
 
-    setActiveStrategies(mockActiveStrategies);
-    setPurchasedStrategies(mockPurchasedStrategies);
-  }, [user]);
+        const myList = mine.map((item: any, idx: number) => {
+          const s = item?.strategy ?? item;
+          return {
+            id: String(item?._id ?? item?.id ?? idx + 1),
+            name: s?.name ?? `Strategy ${idx + 1}`,
+            status: '—',
+            performance: '—',
+            dailyPnL: '—',
+            totalValue: '—',
+            startedAt: item?.createdAt || new Date().toISOString(),
+            users: s?.users ?? 0,
+          };
+        });
+
+        // Load purchases for the user
+        let purchases: any[] = [];
+        if (user?.walletAddress) {
+          try {
+            const res: any = await getUserPurchases(user.walletAddress);
+            const arr = res?.data?.purchases ?? res?.purchases ?? res ?? [];
+            purchases = (Array.isArray(arr) ? arr : []).map((p: any, i: number) => {
+              const st = p?.strategy?.strategy ?? p?.strategy ?? {};
+              const name = st?.name ?? p?.strategyName ?? `Purchase ${i + 1}`;
+              const creator = st?.creator?.address || p?.creator || '';
+              return {
+                id: String(p?.strategyId ?? p?.strategy_id ?? p?.id ?? i + 1),
+                name,
+                creator: creator ? `${creator.slice(0, 6)}…${creator.slice(-4)}` : 'Unknown',
+                performance: '—',
+                dailyPnL: '—',
+                totalInvested: '—',
+                purchasedAt: p?.createdAt || p?.purchasedAt || new Date().toISOString(),
+                status: '—',
+              };
+            });
+          } catch {
+            purchases = [];
+          }
+        }
+
+        if (!cancelled) {
+          setActiveStrategies(myList);
+          setPurchasedStrategies(purchases);
+          setPortfolio((prev) => ({
+            ...prev,
+            totalStrategies: myList.length,
+            activeStrategies: myList.length,
+          }));
+        }
+      } catch {
+        if (!cancelled) {
+          setActiveStrategies([]);
+          setPurchasedStrategies([]);
+          setPortfolio((prev) => ({ ...prev, totalStrategies: 0, activeStrategies: 0 }));
+        }
+      }
+    }
+    load();
+    return () => { cancelled = true };
+  }, [user?.walletAddress]);
 
   const handleStrategyAction = (strategyId: string, action: string) => {
     if (action === 'pause' || action === 'resume') {

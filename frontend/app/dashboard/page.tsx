@@ -3,10 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { Dashboard } from "@/components/Dashboard";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const { ready, authenticated, user: privyUser, getAccessToken } = (usePrivy() as any);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const maybeGetToken = async () => {
@@ -43,9 +45,25 @@ export default function DashboardPage() {
     };
   }, [ready, authenticated, privyUser, accessToken]);
 
-  // Dashboard component self-handles the unauthenticated view
-  const onViewChange = () => {};
+  // Wire child navigation to routes
+  const onViewChange = (view: string) => {
+    switch (view) {
+      case "home":
+        router.push("/");
+        break;
+      case "marketplace":
+        router.push("/marketplace");
+        break;
+      case "create":
+        router.push("/create-stragety");
+        break;
+      case "dashboard":
+        router.push("/dashboard");
+        break;
+      default:
+        router.push("/");
+    }
+  };
 
   return <Dashboard user={user} onViewChange={onViewChange} />;
 }
-
