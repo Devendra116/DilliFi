@@ -176,7 +176,7 @@ export function createDynamicX402Middleware() {
           {
             "POST /api/strategies/buy": {
               price: `$${strategyFeeData.amount}`,
-              network: 'polygon-amoy', // Fixed network as requested
+              network: 'polygon', // Fixed network as requested
               config: {
                 description: `Purchase DeFi Strategy (${strategyId})`,
                 inputSchema: {
@@ -196,7 +196,8 @@ export function createDynamicX402Middleware() {
             },
           },
           {
-            url: process.env.X402_FACILITATOR_URL || "https://x402.polygon.technology",
+            // url: process.env.X402_FACILITATOR_URL || "https://x402.polygon.technology",
+            url: process.env.X402_FACILITATOR_URL || "https://facilitator.x402.rs/",
           }
         );
 
