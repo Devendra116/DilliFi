@@ -1,5 +1,5 @@
 {
-    "name": "Web3 Financial Strategy Platform",
+    "name": "DilliFi",
     "version": "0.1.0",
     "private": true,
     "dependencies": {
@@ -48,7 +48,8 @@
         "sonner": "^2.0.3",
         "tailwind-merge": "*",
         "vaul": "^1.1.2",
-        "viem": "1.21.4"
+        "viem": "1.21.4",
+        "x402-next": "^0.1.0"
     },
     "devDependencies": {
         "@types/node": "^20.10.0",
@@ -58,9 +59,9 @@
         "vite": "6.3.5"
     },
     "scripts": {
-        "dev": "next dev",
+        "dev": "next dev -p 5454",
         "build": "next build",
-        "start": "next start",
+        "start": "next start -p 5454",
         "dev:vite": "vite",
         "build:vite": "vite build"
     }

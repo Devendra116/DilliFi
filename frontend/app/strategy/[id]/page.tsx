@@ -25,7 +25,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useState } from "react";
-import { ensureSession, executePayment } from "@/lib/x402";
+// x402 handled server-side via paymentMiddleware in the API route
 import { buyStrategy, listStrategies, getUserPurchases } from "@/lib/strategiesApi";
 // import type { Strategy } from "@/components/Marketplace";
 
@@ -93,7 +93,7 @@ export default function StrategyDetailsPage() {
   }, [params.id]);
 
   const [executing, setExecuting] = useState(false);
-  const [stage, setStage] = useState<"idle" | "paying" | "queuing" | "success">("idle");
+  const [stage, setStage] = useState<"idle" | "queuing" | "success">("idle");
   const [purchased, setPurchased] = useState<boolean>(false);
 
   // Check if this strategy is already purchased by the user
@@ -131,20 +131,9 @@ export default function StrategyDetailsPage() {
     }
     try {
       setExecuting(true);
-      setStage("paying");
-      const toastId = "x402-purchase";
-      toast.loading("Processing payment via x402…", { id: toastId });
-      await ensureSession();
-      const receipt = await executePayment({
-        amount: "0",
-        currency: "ETH",
-        description: strategy.name,
-      });
-      if (!receipt.ok) throw new Error("Payment failed");
-
       setStage("queuing");
-      toast.message("Payment confirmed. Queuing strategy…", { id: toastId });
-
+      const toastId = "x402-purchase";
+      toast.loading("Executing purchase via x402…", { id: toastId });
       const strategyId = String(doc?._id ?? doc?.id ?? params.id);
       await buyStrategy({ buyerAddress: user.walletAddress, strategyId });
       setPurchased(true);
@@ -321,9 +310,7 @@ export default function StrategyDetailsPage() {
                     {executing ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        {stage === "paying"
-                          ? "Awaiting payment confirmation…"
-                          : "Queuing strategy for execution…"}
+                        {"Queuing strategy for execution…"}
                       </>
                     ) : (
                       <>

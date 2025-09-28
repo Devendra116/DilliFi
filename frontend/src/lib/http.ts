@@ -12,7 +12,7 @@ export class ApiError extends Error {
 // requests on the server side. This eliminates browser CORS entirely.
 export const API_BASE = "/api";
 
-type FetchOptions = RequestInit & { json?: any };
+export type FetchOptions = RequestInit & { json?: any };
 
 export async function apiFetch<T = any>(path: string, opts: FetchOptions = {}) {
   const headers: Record<string, string> = {
