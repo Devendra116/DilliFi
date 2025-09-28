@@ -5,6 +5,7 @@ export type ChainAddress = { chainId: string; address: string };
 export type StrategyTrigger = {
   type: string;
   condition: string;
+  time?: string; // cron-like schedule string if required by backend
   source_value?: number;
   target_value?: number;
   asset?: ChainAddress;

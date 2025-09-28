@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
-import { CreateStrategy } from "@/components/CreateStrategy";
+import { CreateStrategyWizard } from "@/components/CreateStrategyWizard";
 import { toast } from "sonner";
 
 export default function CreateStrategyPage() {
@@ -51,6 +51,5 @@ export default function CreateStrategyPage() {
     router.push("/dashboard");
   };
 
-  return <CreateStrategy user={user} onStrategyCreated={handleStrategyCreated} />;
+  return <CreateStrategyWizard user={user} onStrategyCreated={handleStrategyCreated} />;
 }
-
