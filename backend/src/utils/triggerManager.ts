@@ -8,6 +8,7 @@ export interface TimeTrigger {
   type: TriggerType;
   cron_time: string;   // cron expression, e.g. "*/10 * * * * *"
   endpoint: string;
+  strategy_id: string;
   active?: boolean;    // defaults to true
 }
 
@@ -24,7 +25,10 @@ export function addTrigger(trigger: TimeTrigger) {
     console.log(`⏰ Trigger fired: ${trigger.id}`);
 
     try {
-      await axios.post(trigger.endpoint, { triggerId: trigger.id });
+      await axios.post(trigger.endpoint, {
+        triggerId: trigger.id,
+        strategyId: trigger.strategy_id
+      });
     } catch (err) {
       if (err instanceof Error) {
         console.error(`❌ Error calling endpoint for ${trigger.id}:`, err.message);

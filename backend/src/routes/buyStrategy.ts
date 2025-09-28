@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { Strategy } from "../models/Strategy";
 import { StrategyPurchase } from "../models/StrategyPurchase";
 import { fetchStrategyFeeData } from "../middleware/x402Config";
+import { addTrigger, TimeTrigger } from "../utils/triggerManager";
 import { exact } from "x402/schemes";
 import {
   Network,
@@ -218,6 +219,36 @@ export const buyStrategy = async (req: Request, res: Response) => {
       });
 
       const savedPurchase = await newPurchase.save();
+
+      // Register trigger for strategy execution after successful purchase
+      try {
+        // Fetch the full strategy to get trigger details
+        const strategyDoc = await Strategy.findById(strategyId);
+        if (strategyDoc && strategyDoc.strategy.triggers.length > 0) {
+          const trigger = strategyDoc.strategy.triggers[0]; // Get first trigger
+
+          if (trigger.type === "time") {
+            // Create execution endpoint URL
+            const executionUrl = `${req.protocol}://${req.headers.host}/api/strategies/execute`;
+
+            // Create trigger for execution
+            const timeTrigger: TimeTrigger = {
+              id: `strategy_${savedPurchase._id}_${Date.now()}`,
+              type: "time",
+              cron_time: trigger.time,
+              endpoint: executionUrl,
+              strategy_id: strategyId.toString(),
+              active: true,
+            };
+
+            addTrigger(timeTrigger);
+            console.log(`✅ Trigger registered for strategy ${strategyId}: ${trigger.time}`);
+          }
+        }
+      } catch (triggerError) {
+        console.error("Failed to register trigger:", triggerError);
+        // Don't fail the purchase if trigger registration fails
+      }
 
       return res.status(201).json({
         success: true,
