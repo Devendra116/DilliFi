@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { usePrivy } from "@privy-io/react-auth";
@@ -15,75 +15,19 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BarChart3, Clock, DollarSign, Star, TrendingUp, Shield, Loader2 } from "lucide-react";
+import {
+  BarChart3,
+  Clock,
+  DollarSign,
+  Star,
+  TrendingUp,
+  Shield,
+  Loader2,
+} from "lucide-react";
 import { useState } from "react";
 import { ensureSession, executePayment } from "@/lib/x402";
-import { buyStrategy, type StrategyPayload } from "@/lib/strategiesApi";
-import type { Strategy } from "@/components/Marketplace";
-
-// Fallback dataset if direct import changes later — keeps page self-contained
-const FALLBACK: Strategy[] = [
-  {
-    id: "1",
-    name: "DeFi Yield Maximizer",
-    description:
-      "Automatically compounds yields across multiple DeFi protocols for maximum returns.",
-    creator: "CryptoAlpha",
-    creatorAvatar: "/api/placeholder/40/40",
-    category: "Yield Farming",
-    performance: "+127.3%",
-    performanceValue: 127.3,
-    risk: "Medium",
-    price: "0.5 ETH",
-    priceUSD: "$1,250",
-    rating: 4.8,
-    users: 1240,
-    totalValue: "$2.4M",
-    createdAt: "2024-01-15",
-    tags: ["DeFi", "Yield", "Auto-compound"],
-    verified: true,
-  },
-  {
-    id: "2",
-    name: "Arbitrage Hunter",
-    description:
-      "Exploits price differences across exchanges for consistent, low-risk profits.",
-    creator: "QuantTrader",
-    creatorAvatar: "/api/placeholder/40/40",
-    category: "Arbitrage",
-    performance: "+89.1%",
-    performanceValue: 89.1,
-    risk: "Low",
-    price: "0.3 ETH",
-    priceUSD: "$750",
-    rating: 4.9,
-    users: 856,
-    totalValue: "$1.8M",
-    createdAt: "2024-02-01",
-    tags: ["Arbitrage", "Low-risk", "CEX-DEX"],
-    verified: true,
-  },
-  {
-    id: "3",
-    name: "Momentum Scalper",
-    description:
-      "High-frequency trading strategy that captures small price movements.",
-    creator: "TechAnalyst",
-    creatorAvatar: "/api/placeholder/40/40",
-    category: "Scalping",
-    performance: "+156.7%",
-    performanceValue: 156.7,
-    risk: "High",
-    price: "0.8 ETH",
-    priceUSD: "$2,000",
-    rating: 4.6,
-    users: 634,
-    totalValue: "$3.1M",
-    createdAt: "2024-01-10",
-    tags: ["Scalping", "High-frequency", "Technical"],
-    verified: false,
-  },
-];
+import { buyStrategy, listStrategies, getUserPurchases } from "@/lib/strategiesApi";
+// import type { Strategy } from "@/components/Marketplace";
 
 export default function StrategyDetailsPage() {
   const params = useParams<{ id: string }>();
@@ -108,12 +52,77 @@ export default function StrategyDetailsPage() {
     };
   }, [ready, authenticated, privyUser]);
 
-  const strategy: Strategy | undefined = useMemo(
-    () => FALLBACK.find((s) => s.id === String(params.id)),
-    [params.id]
-  );
+  const [doc, setDoc] = useState<any | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const strategy: any | undefined = doc?.strategy;
+  const creatorAddr = strategy?.creator?.address || doc?.userAddress || "";
+  const creatorDisplay = creatorAddr
+    ? `${creatorAddr.slice(0, 6)}…${creatorAddr.slice(-4)}`
+    : "Unknown";
+  const createdAt = doc?.createdAt || new Date().toISOString();
+  const tags: string[] = Array.isArray(strategy?.triggers)
+    ? (strategy.triggers.map((t: any) => t?.type).filter(Boolean) as string[])
+    : [];
+  const category = strategy?.execution_steps?.[0]?.integration_type || "Custom";
+  const price =
+    typeof strategy?.fee?.amount === "number"
+      ? `${strategy.fee.amount} TOKEN`
+      : strategy?.price || "—";
+  const priceUSD = strategy?.priceUSD || "";
+  const performance = strategy?.performance ?? "New";
+  const totalValue = strategy?.totalValue ?? "$0";
+  const rating = strategy?.rating ?? 0;
+  const usersCount = strategy?.users ?? 0;
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        const all: any[] = await listStrategies();
+        const found = all.find(
+          (it: any) => String(it._id) === String(params.id)
+        );
+        setDoc(found || null);
+      } catch {
+        setDoc(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [params.id]);
 
   const [executing, setExecuting] = useState(false);
+  const [stage, setStage] = useState<"idle" | "paying" | "queuing" | "success">("idle");
+  const [purchased, setPurchased] = useState<boolean>(false);
+
+  // Check if this strategy is already purchased by the user
+  useEffect(() => {
+    const checkPurchased = async () => {
+      try {
+        if (!user?.walletAddress) return;
+        const res: any = await getUserPurchases(user.walletAddress);
+        const arr = res?.data?.purchases ?? res?.purchases ?? res ?? [];
+        const ids = (Array.isArray(arr) ? arr : [])
+          .map((p: any) =>
+            String(
+              p?.strategyId ??
+                p?.strategy_id ??
+                p?.strategy?._id ??
+                p?.strategy?.id ??
+                p?.strategy ??
+                ""
+            )
+          )
+          .filter(Boolean);
+        const currentId = String(doc?._id ?? doc?.id ?? params.id);
+        setPurchased(ids.includes(currentId));
+      } catch {
+        // ignore errors on purchased check
+      }
+    };
+    checkPurchased();
+  }, [user?.walletAddress, doc?._id, doc?.id, params.id]);
 
   const handlePurchase = async () => {
     if (!user?.walletAddress || !strategy) {
@@ -122,78 +131,53 @@ export default function StrategyDetailsPage() {
     }
     try {
       setExecuting(true);
+      setStage("paying");
+      const toastId = "x402-purchase";
+      toast.loading("Processing payment via x402…", { id: toastId });
       await ensureSession();
-
-      const payload: StrategyPayload = {
-        name: strategy.name,
-        desc: strategy.description,
-        creator: { chainId: "1", address: user.walletAddress },
-        triggers: [
-          {
-            type: "price",
-            condition: "above",
-            source_value: 3000,
-            target_value: 3100,
-            asset: { chainId: "1", address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" },
-            source:
-              "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd",
-          },
-        ],
-        execution_steps: [
-          {
-            integration_type: "uniswap",
-            integration_steps: [
-              {
-                step_type: "approval",
-                token: { chainId: "1", address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" },
-                amount: "1000000000000000000",
-                spender: { chainId: "1", address: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D" },
-              },
-              {
-                step_type: "swap",
-                version: "v2",
-                function_name: "swapExactETHForTokens",
-                token_in: { chainId: "1", address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" },
-                token_out: { chainId: "1", address: "0xA0b86a33E6E8c3c4e8a6C8d7f2b4A6f5B4A2cDcE" },
-                amount_in: "1000000000000000000",
-                amount_out_min: "2900000000",
-                path: [
-                  { chainId: "1", address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" },
-                  { chainId: "1", address: "0xA0b86a33E6E8c3c4e8a6C8d7f2b4A6f5B4A2cDcE" },
-                ],
-                recipient: { chainId: "1", address: user.walletAddress },
-                deadline: "1735689600",
-                extra: { slippage: "0.5", gasLimit: "200000" },
-              },
-            ],
-          },
-        ],
-        pre_conditions: [],
-        max_supply: {
-          chainId: "1",
-          address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-          amount: 100,
-        },
-        fee: {
-          chainId: "1",
-          address: "0xA0b86a33E6E8c3c4e8a6C8d7f2b4A6f5B4A2cDcE",
-          amount: 0.1,
-          recipient: user.walletAddress,
-        },
-        payment_mode: "x402",
-      };
-
-      const receipt = await executePayment({ amount: "0", currency: "ETH", description: strategy.name });
+      const receipt = await executePayment({
+        amount: "0",
+        currency: "ETH",
+        description: strategy.name,
+      });
       if (!receipt.ok) throw new Error("Payment failed");
 
-      await buyStrategy({ userAddress: user.walletAddress, strategy: payload });
-      toast.success("Strategy executed via x402 and queued for execution");
+      setStage("queuing");
+      toast.message("Payment confirmed. Queuing strategy…", { id: toastId });
+
+      const strategyId = String(doc?._id ?? doc?.id ?? params.id);
+      await buyStrategy({ buyerAddress: user.walletAddress, strategyId });
+      setPurchased(true);
+      setStage("success");
+      toast.success("Queued and executing. You’ll be notified on completion.", {
+        id: toastId,
+      });
     } catch (e: any) {
       toast.error(e?.message || "Execution failed");
     } finally {
       setExecuting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-neutral-950 text-neutral-100 py-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Loading strategy…</CardTitle>
+              <CardDescription>Please wait a moment</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2 text-gray-400">
+                <Loader2 className="w-4 h-4 animate-spin" /> Fetching details
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   if (!strategy) {
     return (
@@ -224,11 +208,11 @@ export default function StrategyDetailsPage() {
           <div className="flex items-center gap-3">
             <Avatar className="h-12 w-12 gap-3">
               <AvatarImage
-                src={strategy.creatorAvatar}
-                alt={strategy.creator}
+                src={strategy.creatorAvatar || "/api/placeholder/40/40"}
+                alt={creatorDisplay}
               />
               <AvatarFallback className="mr-3">
-                {strategy.creator.charAt(0)}
+                {creatorDisplay.charAt(0)}
               </AvatarFallback>
             </Avatar>
             <div>
@@ -239,8 +223,7 @@ export default function StrategyDetailsPage() {
                 )}
               </h1>
               <p className="text-sm text-gray-400">
-                by {strategy.creator} •{" "}
-                {new Date(strategy.createdAt).toLocaleDateString()}
+                by {creatorDisplay} • {new Date(createdAt).toLocaleDateString()}
               </p>
             </div>
           </div>
@@ -254,14 +237,12 @@ export default function StrategyDetailsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Overview</CardTitle>
-                <CardDescription>{strategy.category}</CardDescription>
+                <CardDescription>{category}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="leading-relaxed text-gray-200">
-                  {strategy.description}
-                </p>
+                <p className="leading-relaxed text-gray-200">{strategy.desc}</p>
                 <div className="flex flex-wrap gap-2">
-                  {strategy.tags.map((t) => (
+                  {tags.map((t) => (
                     <Badge key={t} variant="secondary">
                       {t}
                     </Badge>
@@ -281,29 +262,23 @@ export default function StrategyDetailsPage() {
                     <TrendingUp className="w-4 h-4" />
                     <span>Performance</span>
                   </div>
-                  <p className="font-semibold text-green-500">
-                    {strategy.performance}
-                  </p>
+                  <p className="font-semibold text-green-500">{performance}</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-1 text-gray-400">
                     <BarChart3 className="w-4 h-4" />
                     <span>Total Value</span>
                   </div>
-                  <p className="font-semibold">{strategy.totalValue}</p>
+                  <p className="font-semibold">{totalValue}</p>
                 </div>
                 <div className="flex items-center gap-1">
                   <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                  <span className="font-medium">{strategy.rating}</span>
-                  <span className="text-gray-400">
-                    ({strategy.users} users)
-                  </span>
+                  <span className="font-medium">{rating}</span>
+                  <span className="text-gray-400">({usersCount} users)</span>
                 </div>
                 <div className="flex items-center gap-1 text-gray-400">
                   <Clock className="w-4 h-4" />
-                  <span>
-                    {new Date(strategy.createdAt).toLocaleDateString()}
-                  </span>
+                  <span>{new Date(createdAt).toLocaleDateString()}</span>
                 </div>
               </CardContent>
             </Card>
@@ -317,20 +292,23 @@ export default function StrategyDetailsPage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold text-lg">{strategy.price}</p>
-                    <p className="text-sm text-gray-400">{strategy.priceUSD}</p>
+                    <p className="font-semibold text-lg">{price}</p>
+                    <p className="text-sm text-gray-400">{priceUSD}</p>
                   </div>
-                  <Badge variant="outline">{strategy.category}</Badge>
+                  <Badge variant="outline">{category}</Badge>
                 </div>
                 <Button
                   style={{ background: "rgb(255, 122, 0)" }}
                   className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white"
                   onClick={handlePurchase}
-                  disabled={executing}
+                  disabled={executing || purchased}
                 >
-                  {executing ? (
+                  {purchased ? (
+                    <>Purchased</>
+                  ) : executing ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Executing…
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {stage === "paying" ? "Processing payment…" : "Queuing…"}
                     </>
                   ) : (
                     <>
@@ -338,6 +316,23 @@ export default function StrategyDetailsPage() {
                     </>
                   )}
                 </Button>
+                {(executing || stage === "success") && (
+                  <div className="text-sm text-gray-400 flex items-center gap-2">
+                    {executing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        {stage === "paying"
+                          ? "Awaiting payment confirmation…"
+                          : "Queuing strategy for execution…"}
+                      </>
+                    ) : (
+                      <>
+                        <Shield className="w-4 h-4 text-orange-500" />
+                        Queued and executing
+                      </>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
 

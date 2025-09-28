@@ -50,7 +50,10 @@ export type CreateStrategyRequest = {
   strategy: StrategyPayload;
 };
 
-export type BuyStrategyRequest = CreateStrategyRequest;
+export type BuyStrategyRequest = {
+  buyerAddress: string;
+  strategyId: string;
+};
 
 export type StrategySummary = {
   id?: string;
@@ -63,7 +66,9 @@ export type StrategySummary = {
 };
 
 export async function listStrategies() {
-  return apiFetch<StrategySummary[]>("/api/strategies", { method: "GET" });
+  const res: any = await apiFetch("/api/strategies", { method: "GET" });
+  const arr = res?.data?.strategies ?? res?.strategies ?? res ?? [];
+  return Array.isArray(arr) ? arr : [];
 }
 
 export async function createStrategy(req: CreateStrategyRequest) {
@@ -77,4 +82,3 @@ export async function buyStrategy(req: BuyStrategyRequest) {
 export async function getUserPurchases(userAddress: string) {
   return apiFetch(`/api/users/${userAddress}/purchases`, { method: "GET" });
 }
-

@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 import { useRouter } from "next/navigation";
+import { listStrategies, getUserPurchases } from "@/lib/strategiesApi";
 
 interface MarketplaceProps {
   user: any;
@@ -65,6 +66,36 @@ export function Marketplace({ user, onPurchase }: MarketplaceProps) {
   const [selectedRisk, setSelectedRisk] = useState("all");
   const [sortBy, setSortBy] = useState("performance");
   const [loading, setLoading] = useState(true);
+  const [purchasedIds, setPurchasedIds] = useState<Set<string>>(new Set());
+  // Map API strategy payload to card model
+  function mapApiToCard(item: any, idx: number): Strategy {
+    const s = item?.strategy ?? item;
+    const name = s?.name ?? `Strategy ${idx + 1}`;
+    const desc = s?.desc ?? "";
+    const creatorAddr = s?.creator?.address || item?.userAddress || "";
+    const category = s?.execution_steps?.[0]?.integration_type || "Custom";
+    const feeAmount = s?.fee?.amount;
+    const price = typeof feeAmount === "number" ? `${feeAmount} TOKEN` : s?.price || "—";
+    return {
+      id: String(item?._id ?? item?.id ?? idx + 1),
+      name,
+      description: desc,
+      creator: creatorAddr ? `${creatorAddr.slice(0, 6)}…${creatorAddr.slice(-4)}` : "Unknown",
+      creatorAvatar: "/api/placeholder/40/40",
+      category,
+      performance: "New",
+      performanceValue: 0,
+      risk: "Medium",
+      price,
+      priceUSD: "",
+      rating: 0,
+      users: 0,
+      totalValue: "$0",
+      createdAt: item?.createdAt || new Date().toISOString(),
+      tags: (s?.triggers?.map((t: any) => t?.type).filter(Boolean) as string[]) || [],
+      verified: true,
+    };
+  }
 
   // Mock data - in a real app, this would come from your backend
   const mockStrategies: Strategy[] = [
@@ -191,13 +222,53 @@ export function Marketplace({ user, onPurchase }: MarketplaceProps) {
   ];
 
   useEffect(() => {
-    // Simulate loading data
-    setTimeout(() => {
-      setStrategies(mockStrategies);
-      setFilteredStrategies(mockStrategies);
-      setLoading(false);
-    }, 1000);
+    const load = async () => {
+      try {
+        setLoading(true);
+        const data: any = await listStrategies();
+        const cards = Array.isArray(data) ? data.map((it, i) => mapApiToCard(it, i)) : [];
+        setStrategies(cards);
+        setFilteredStrategies(cards);
+      } catch (e) {
+        setStrategies([]);
+        setFilteredStrategies([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, []);
+
+  // Load purchased strategy IDs for the signed-in user
+  useEffect(() => {
+    const loadPurchases = async () => {
+      try {
+        if (!user?.walletAddress) {
+          setPurchasedIds(new Set());
+          return;
+        }
+        const res: any = await getUserPurchases(user.walletAddress);
+        const arr = res?.data?.purchases ?? res?.purchases ?? res ?? [];
+        const ids = (Array.isArray(arr) ? arr : [])
+          .map((p: any) =>
+            String(
+              p?.strategyId ??
+                p?.strategy_id ??
+                p?.strategy?._id ??
+                p?.strategy?.id ??
+                p?.strategy ??
+                p?.id ??
+                ""
+            )
+          )
+          .filter(Boolean);
+        setPurchasedIds(new Set(ids));
+      } catch {
+        setPurchasedIds(new Set());
+      }
+    };
+    loadPurchases();
+  }, [user?.walletAddress]);
 
   useEffect(() => {
     let filtered = strategies.filter((strategy) => {
@@ -489,9 +560,10 @@ export function Marketplace({ user, onPurchase }: MarketplaceProps) {
                       e.stopPropagation();
                       handlePurchase(strategy.id);
                     }}
+                    disabled={purchasedIds.has(String(strategy.id))}
                   >
                     <DollarSign className="w-4 h-4 mr-2" />
-                    Purchase
+                    {purchasedIds.has(String(strategy.id)) ? "Purchased" : "Purchase"}
                   </Button>
                 </div>
               </CardContent>
