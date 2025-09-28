@@ -39,7 +39,7 @@ const StrategyPurchaseSchema = new mongoose.Schema({
   // Optional blockchain transaction hash for verification
   transactionHash: {
     type: String,
-    sparse: true
+    required: false
   },
   purchasedAt: {
     type: Date,
