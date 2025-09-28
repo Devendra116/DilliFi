@@ -176,7 +176,7 @@ export function createDynamicX402Middleware() {
           {
             "POST /api/strategies/buy": {
               price: `$${strategyFeeData.amount}`,
-              network: 'polygon', // Fixed network as requested
+              network: 'polygon-amoy', // Fixed network as requested
               config: {
                 description: `Purchase DeFi Strategy (${strategyId})`,
                 inputSchema: {

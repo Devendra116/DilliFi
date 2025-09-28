@@ -156,7 +156,7 @@ export const buyStrategy = async (req: Request, res: Response) => {
     const paymentRequirements = [
       createExactPaymentRequirements(
         strategyFeeData.amount, // Use exact amount from database
-        'polygon', // Fixed network
+        'polygon-amoy', // Fixed network
         resource,
         strategyFeeData.recipient as `0x${string}`, // Strategy-specific recipient
         `Purchase DeFi Strategy (${strategyId})`
